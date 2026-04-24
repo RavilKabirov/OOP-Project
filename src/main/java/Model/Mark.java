@@ -28,6 +28,11 @@ public class Mark {
      */
     private double final;
 
+    /**
+     * 
+     */
+    private Long enrollmentId;
+
 
     /**
      * @return
