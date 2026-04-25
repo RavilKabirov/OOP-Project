@@ -1,51 +1,65 @@
-
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
-public class Transcript {
+public class Transcript implements Serializable{
 
-    /**
-     * Default constructor
-     */
+    private Student student;
+    private List<Enrollment>allEnrollments;
+
     public Transcript() {
+        this.allEnrollments=new ArrayList<>();
     }
 
-    /**
-     * 
-     */
-    private Student Student;
+    public Transcript(Student student) {
+        this.student=student;
+        this.allEnrollments=new ArrayList<>();
+    }
 
-    /**
-     * 
-     */
-    public List<Enrollment> allEnrollments;
-
-
-    /**
-     * @return
-     */
     public double calculateGPA() {
-        // TODO implement here
-        return 0.0d;
-    }
+        if (allEnrollments==null||allEnrollments.isEmpty()) {
+            return 0;
+        }
+        double total=0;
+        int count=0;
 
-    /**
-     * @return
-     */
+        for (Enrollment enrollment:allEnrollments) {
+            if (enrollment.getMark()!=null) {
+                total+=enrollment.getMark().calculateTotal();
+                count++;
+            }
+        }
+        if (count==0) {
+            return 0;
+        }
+        return total / count;
+    }
     public List<Enrollment> getEnrollments() {
-        // TODO implement here
-        return null;
+        return allEnrollments;
     }
 
-    /**
-     * @return
-     */
+    public void addEnrollment(Enrollment enrollment) {
+        if (enrollment!=null) {
+            allEnrollments.add(enrollment);
+        }
+    }
     public void generateReport() {
-        // TODO implement here
-        return null;
+        System.out.println("Student:"+student);
+        System.out.println("GPA:"+calculateGPA());
+
+        for (Enrollment enrollment:allEnrollments) {
+            System.out.println(enrollment);
+        }
     }
 
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student=student;
+    }
+
+    public String toString() {
+        return "Transcript{"+"student="+student+", GPA="+calculateGPA() +'}';
+    }
 }
