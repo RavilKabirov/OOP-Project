@@ -1,137 +1,58 @@
-
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
-public class Course {
-
-    /**
-     * Default constructor
-     */
-    public Course() {
-    }
-
-    /**
-     * 
-     */
+public class Course{
     private String courseId;
-
-    /**
-     * 
-     */
     private String name;
-
-    /**
-     * 
-     */
     private int credits;
-
-    /**
-     * 
-     */
     private List<Teacher> teachers;
-
-    /**
-     * 
-     */
     private List<Enrollment> enrollments;
-
-    /**
-     * 
-     */
     private CourseType courseType;
 
-
-
-    /**
-     * @return
-     */
-    public String getCourseId() {
-        // TODO implement here
-        return "";
+    public Course() {
+        this.teachers=new ArrayList<>();
+        this.enrollments=new ArrayList<>();
     }
 
-    /**
-     * @param value
-     */
+    public String getCourseId(){
+        return courseId;
+    }
     public void setCourseId(String value) {
-        // TODO implement here
+        this.courseId=value;
     }
-
-    /**
-     * @return
-     */
-    public String getName() {
-        // TODO implement here
-        return "";
+    public String getName(){
+        return name;
     }
-
-    /**
-     * @param value
-     */
     public void setName(String value) {
-        // TODO implement here
+        this.name=value;
     }
-
-    /**
-     * @return
-     */
     public int getCredits() {
-        // TODO implement here
-        return 0;
+        return credits;
     }
-
-    /**
-     * @param value
-     */
     public void setCredits(int value) {
-        // TODO implement here
+        this.credits = value;
     }
-
-    /**
-     * @return
-     */
     public List<Teacher> getTeachers() {
-        // TODO implement here
-        return null;
+        return teachers;
     }
-
-    /**
-     * @param value
-     */
-    public void addTeacher(Teacher value) {
-        // TODO implement here
-    }
-
-    /**
-     * @param value
-     */
-    public void removeTeacher(Teacher value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
     public List<Enrollment> getEnrollments() {
-        // TODO implement here
-        return null;
+        return enrollments;
     }
-
-    /**
-     * @param value
-     */
+    public void addTeacher(Teacher value) {
+        if (value!=null) {
+            teachers.add(value);
+        }
+    }
+    public void removeTeacher(Teacher value) {
+        teachers.remove(value);
+    }
     public void addEnrollment(Enrollment value) {
-        // TODO implement here
+        if (value != null) {
+            enrollments.add(value);
+        }
     }
 
-    /**
-     * @param value
-     */
     public void removeEnrollment(Enrollment value) {
-        // TODO implement here
+        enrollments.remove(value);
     }
-
 }
