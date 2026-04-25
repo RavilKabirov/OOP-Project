@@ -1,109 +1,49 @@
-
 import java.io.*;
 import java.util.*;
+import java.time.LocalDateTime;
 
-/**
- * 
- */
 public class Enrollment {
 
-    /**
-     * Default constructor
-     */
-    public Enrollment() {
-    }
-
-    /**
-     * 
-     */
     private Long id;
-
-    /**
-     * 
-     */
-    private Student Student;
-
-    /**
-     * 
-     */
+    private Student student;
     private Course course;
-
-    /**
-     * 
-     */
     private LocalDateTime enrollmentDate;
-
-    /**
-     * 
-     */
     private EnrollmentStatus status;
-
-    /**
-     * 
-     */
     private Mark mark;
 
-
-
-
-    /**
-     * @return
-     */
+    public Enrollment() {
+        this.enrollmentDate=LocalDateTime.now(); 
+    }
     public EnrollmentStatus getStatus() {
-        // TODO implement here
-        return null;
+        return status;
     }
-
-    /**
-     * @param value
-     */
     public void setStatus(EnrollmentStatus value) {
-        // TODO implement here
+        this.status=value;
     }
-
-    /**
-     * @return
-     */
     public Mark getMark() {
-        // TODO implement here
-        return null;
+        return mark;
     }
-
-    /**
-     * @param value
-     */
     public void setMark(Mark value) {
-        // TODO implement here
+        this.mark=value;
     }
-
-    /**
-     * @return
-     */
     public Student getStudent() {
-        // TODO implement here
-        return null;
+        return student;
     }
-
-    /**
-     * @param value
-     */
     public void setStudent(Student value) {
-        // TODO implement here
+        this.student=value;
     }
-
-    /**
-     * @return
-     */
     public Course getCourse() {
-        // TODO implement here
-        return null;
+        return course;
     }
-
-    /**
-     * @param value
-     */
     public void setCourse(Course value) {
-        // TODO implement here
+        this.course=value;
     }
 
+
+    @Override
+    public String toString() {
+        return "Enrollment{"+"id="+id+", student="+(student!=null ? student.toString():"null")+", course="+(course != null ? course.getName() : "null") +
+                ", status=" + status +
+                '}';
+    }
 }
