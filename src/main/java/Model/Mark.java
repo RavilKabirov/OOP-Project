@@ -1,90 +1,40 @@
-
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class Mark {
 
-    /**
-     * Default constructor
-     */
-    public Mark() {
-    }
-
-    /**
-     * 
-     */
     private double firstAttestation;
-
-    /**
-     * 
-     */
     private double secondAttestation;
-
-    /**
-     * 
-     */
-    private double final;
-
-    /**
-     * 
-     */
+    private double finalExam;
     private Long enrollmentId;
 
-
-    /**
-     * @return
-     */
-    public double calculateTotal() {
-        // TODO implement here
-        return 0.0d;
+    public Mark() {
+    }
+    public double calculateTotal(){
+        return firstAttestation+secondAttestation+finalExam;
+    }
+    public double getFirstAttestation(){
+        return firstAttestation;
+    }
+    public void setFirstAttestation(double value){
+        this.firstAttestation=value;
+    }
+    public double getSecondAttestation(){
+        return secondAttestation;
+    }
+    public void setSecondAttestation(double value){
+        this.secondAttestation=value;
     }
 
-    /**
-     * @return
-     */
-    public double getFirstAttestation() {
-        // TODO implement here
-        return 0.0d;
+    public double getFinal(){
+        return finalExam;
     }
-
-    /**
-     * @param value
-     */
-    public void setFirstAttestation(double value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public double getSecondAttestation() {
-        // TODO implement here
-        return 0.0d;
-    }
-
-    /**
-     * @param value
-     */
-    public void setSecondAttestation(double value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public double getFinal() {
-        // TODO implement here
-        return 0.0d;
-    }
-
-    /**
-     * @param value
-     */
     public void setFinal(double value) {
-        // TODO implement here
+        this.finalExam=value;
     }
-
+    @Override
+    public String toString() {
+        return "Mark{"+"first="+firstAttestation+", second="+secondAttestation+
+                ", final=" + finalExam +", total=" + calculateTotal() +'}';
+    }
 }
