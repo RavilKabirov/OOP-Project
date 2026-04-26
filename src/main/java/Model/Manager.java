@@ -5,52 +5,40 @@ import java.util.*;
 /**
  * 
  */
-public class Manager extends Employee {
-
-    /**
-     * Default constructor
-     */
+public abstract class Manager extends Employee {
+    private ManagerLevel level;
+    private LocalDateTime appointedAt;
+    
+    
     public Manager() {
     }
-
-    /**
-     * 
-     */
-    private ManagerLevel level;
-
-    /**
-     * 
-     */
-    private LocalDateTime appointedAt;
 
     /**
      * @return
      */
     public ManagerLevel getLevel() {
-        // TODO implement here
-        return null;
+        return level;
     }
 
     /**
      * @param value
      */
     public void setLevel(ManagerLevel value) {
-        // TODO implement here
+        this.level=value;
     }
 
     /**
      * @return
      */
     public LocalDateTime getAppointedAt() {
-        // TODO implement here
-        return null;
+        return appointedAt;
     }
 
     /**
      * @param value
      */
     public void setAppointedAt(LocalDateTime value) {
-        // TODO implement here
+        this.appointedAt=value;
     }
 
 }
