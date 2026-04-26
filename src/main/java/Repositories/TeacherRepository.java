@@ -1,74 +1,58 @@
 
-import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class TeacherRepository {
 
-    /**
-     * Default constructor
-     */
-    public TeacherRepository() {
-    }
 
-    /**
-     * 
-     */
+    
     private List<Teacher> teachers;
 
-    /**
-     * @param teacher 
-     * @return
-     */
+
+    public TeacherRepository() {
+        this.teachers = new ArrayList<>();
+    }
+
     public Teacher save(Teacher teacher) {
-        // TODO implement here
-        return null;
+        String empId = teacher.getEmployeeId();
+        Optional<Teacher> existing = findByEmployeeId(empId);
+        if (existing.isPresent()) {
+            teachers.remove(existing.get());
+        }
+        teachers.add(teacher);
+        return teacher;
     }
 
-    /**
-     * @param employeeId 
-     * @return
-     */
     public Optional<Teacher> findByEmployeeId(String employeeId) {
-        // TODO implement here
-        return null;
+                return teachers.stream().filter(t -> t.getEmployeeId().equals(employeeId)).findFirst();
     }
 
-    /**
-     * @param deptId 
-     * @return
-     */
     public List<Teacher> findByDepartment(Long deptId) {
-        // TODO implement here
-        return null;
+        List<Teacher> result = new ArrayList<>();
+        for (Teacher t : teachers) {
+            if (t.getDepartment() != null && t.getDepartment().getId().equals(deptId)) {
+                result.add(t);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param courseId 
-     * @return
-     */
-    public List<Teacher> findByCourse(Long courseId) {
-        // TODO implement here
-        return null;
+    public List<Teacher> findByCourse(String courseId) {
+        List<Teacher> result = new ArrayList<>();
+        for (Teacher t : teachers) {
+            boolean teachesCourse = t.getCourses().stream().anyMatch(c -> c.getCourseId().equals(courseId));
+            if (teachesCourse) {
+                result.add(t);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @return
-     */
     public List<Teacher> findAll() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>(teachers);
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+    public void deleteById(String employeeId) {
+        teachers.removeIf(t -> t.getEmployeeId().equals(employeeId));
     }
 
 }

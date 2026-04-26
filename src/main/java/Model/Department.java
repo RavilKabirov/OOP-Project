@@ -99,4 +99,7 @@ public class Department {
         // TODO implement here
     }
 
+    public Long getId(){
+        return this.id;
+    }
 }
