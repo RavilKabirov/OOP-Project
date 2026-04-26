@@ -6,58 +6,45 @@ import java.util.*;
  * 
  */
 public class HRManager extends Manager {
-
-    /**
-     * Default constructor
-     */
+    private List<School> departments = new ArrayList<>();
+    private String specialization;
+    
     public HRManager() {
     }
-
-    /**
-     * 
-     */
-    private List<School> departments;
-
-    /**
-     * 
-     */
-    private String specialization;
 
     /**
      * @return
      */
     public List<School> getDepartments() {
-        // TODO implement here
-        return null;
+        return departments;
     }
 
     /**
      * @param value
      */
     public void addDepartment(School value) {
-        // TODO implement here
+        departments.add(value);
     }
 
     /**
      * @return
      */
     public String getSpecialization() {
-        // TODO implement here
-        return "";
+        return specialization;
     }
 
     /**
      * @param value
      */
     public void setSpecialization(String value) {
-        // TODO implement here
+        this.specialization=value;
     }
 
     /**
      * @param value
      */
     public void removeDepartment(School value) {
-        // TODO implement here
+        departments.remove(value);
     }
 
 }
