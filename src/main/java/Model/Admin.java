@@ -6,71 +6,52 @@ import java.util.*;
  * 
  */
 public class Admin extends Employee {
-
-    /**
-     * Default constructor
-     */
-    public Admin() {
-    }
-
-    /**
-     * 
-     */
     private Long adminId;
-
-    /**
-     * 
-     */
     private AdminLevel accessLevel;
-
-    /**
-     * 
-     */
     private List<Permission> permissions;
+    
+    public Admin() {}
 
     /**
      * @return
      */
     public Long getAdminId() {
-        // TODO implement here
-        return null;
+        return adminId;
     }
 
     /**
      * @param value
      */
     public void setAdminId(Long value) {
-        // TODO implement here
+        this.adminId=value;
     }
 
     /**
      * @return
      */
     public AdminLevel getAccessLevel() {
-        // TODO implement here
-        return null;
+        return accessLevel;
     }
 
     /**
      * @param value
      */
     public void setAccessLevel(AdminLevel value) {
-        // TODO implement here
+        this.accessLevel=value;
     }
 
     /**
      * @return
      */
     public List<Permission> getPermissions() {
-        // TODO implement here
-        return null;
+        return permissions;
     }
 
     /**
      * @param value
      */
     public void setPermissions(List<Permission> value) {
-        // TODO implement here
+        this.permissions=value;
     }
 
 }
