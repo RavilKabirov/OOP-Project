@@ -6,31 +6,22 @@ import java.util.*;
  * 
  */
 public class PRManager extends Manager {
+    private List<String> managedChannels = new ArrayList<>();
 
-    /**
-     * Default constructor
-     */
     public PRManager() {
     }
-
-    /**
-     * 
-     */
-    private List<String> managedChannels;
-
     /**
      * @return
      */
     public List<String> getManagedChannels() {
-        // TODO implement here
-        return null;
+        return managedChannels;
     }
 
     /**
      * @param value
      */
     public void setManagedChannels(List<String> value) {
-        // TODO implement here
+        this.managedChannels=value;
     }
 
 }
