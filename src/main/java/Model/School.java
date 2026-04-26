@@ -6,27 +6,12 @@ import java.util.*;
  * 
  */
 public class School {
-
-    /**
-     * Default constructor
-     */
+    private Long id;
+    private String name;
+    private Dean dean;
+    
     public School() {
     }
-
-    /**
-     * 
-     */
-    private Long id;
-
-    /**
-     * 
-     */
-    private String name;
-
-    /**
-     * 
-     */
-    private Dean dean;
 
 
 
@@ -34,45 +19,42 @@ public class School {
      * @return
      */
     public Long getId() {
-        // TODO implement here
-        return null;
+        return id;
     }
 
     /**
      * @param value
      */
     public void setId(Long value) {
-        // TODO implement here
+        this.id=value;
     }
 
     /**
      * @return
      */
     public String getName() {
-        // TODO implement here
-        return "";
+        return name;
     }
 
     /**
      * @param value
      */
     public void setName(String value) {
-        // TODO implement here
+        this.name=value;
     }
 
     /**
      * @return
      */
     public Dean getDean() {
-        // TODO implement here
-        return null;
+        return dean;
     }
 
     /**
      * @param value
      */
     public void setDean(Dean value) {
-        // TODO implement here
+        this.dean=value;
     }
 
 }
