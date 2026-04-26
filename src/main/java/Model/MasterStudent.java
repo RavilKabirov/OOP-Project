@@ -17,5 +17,12 @@ public class MasterStudent extends Student {
      * 
      */
     private String thesisTitle;
+    
+    public String getTheSisTitle() {
+    	return thesisTitle;
+    }
 
+    	public void setTheSisTitle(String value) {
+    		this.thesisTitle=value;
+    	}
 }
