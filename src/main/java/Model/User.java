@@ -1,74 +1,38 @@
-
 import java.io.*;
 import java.util.*;
-
+import java.time.LocalDateTime;
 /**
  * 
  */
 public class User {
-
-    /**
-     * Default constructor
-     */
+    private Long Id;
+    private String firstName;
+    private String lastName;
+    private String Email;
+    private String passwordHash;
+    private LocalDateTime createdAt;
+    private boolean isActive;
+    
     public User() {
     }
 
-    /**
-     * 
-     */
-    private Long Id;
-
-    /**
-     * 
-     */
-    private String firstName;
-
-    /**
-     * 
-     */
-    private String lastName;
-
-    /**
-     * 
-     */
-    private String Email;
-
-    /**
-     * 
-     */
-    private String passwordHash;
-
-    /**
-     * 
-     */
-    private LocalDateTime createdAt;
-
-    /**
-     * 
-     */
-    private boolean isActive;
-
-    /**
-     * 
-     */
-    public void setFullName() {
-        // TODO implement here
+    public void setFullName(String firstName, String lastName) {
+        this.firstName=firstName;
+        this.lastName=lastName;
     }
 
     /**
      * @return
      */
     public String getFullName() {
-        // TODO implement here
-        return "";
+        return firstName + " " + lastName;
     }
 
     /**
      * @return
      */
     public String getEmail() {
-        // TODO implement here
-        return null;
+        return Email;
     }
 
     /**
@@ -76,8 +40,7 @@ public class User {
      * @return
      */
     public void setEmail(String email) {
-        // TODO implement here
-        return;
+        this.Email=email;
     }
 
     /**
@@ -86,17 +49,22 @@ public class User {
      * @return
      */
     public void changePassword(String oldPass, String newPass) {
-        // TODO implement here
-        return;
+        if(checkPassword(oldPass)) {
+        	this.passwordHash=hashPassword(newPass);
+        }
     }
 
     /**
      * @param rawPass 
      * @return
      */
+    
+    private String hashPassword(String raw) {
+    	return Integer.toHexString(raw.hashCode());
+    }
+    
     public boolean checkPassword(String rawPass) {
-        // TODO implement here
-        return false;
+        return passwordHash.equals(hashPassword(rawPass));
     }
 
 
@@ -104,27 +72,58 @@ public class User {
      * @return
      */
     public String getPasswordHash() {
-        // TODO implement here
-        return "";
+        return passwordHash;
     }
 
     /**
      * @param value
      */
     public void setPassword(String value) {
-        // TODO implement here
+        this.passwordHash=hashPassword(value);
     }
 
     public void switchActive(){
-        return;
+        this.isActive=!isActive;;
     }
-    public Long getId(){
-        return null;
-    }
+    
     public void setId(long id){
-        return;
+        this.Id=id;
     }
     public boolean isActive(){
         return this.isActive;
     }
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Long getId() {
+		return Id;
+	}
+
+	public void setId(Long id) {
+		Id = id;
+	}
+	
+	@Override
+	public String toString() {
+		return getFullName() + " | " + Email;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(this==o) return true;
+		if(!(o instanceof User)) return false;
+		User user = (User) o;
+		return Objects.equals(Id, user.Id) && Objects.equals(Email, user.Email);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(Id,Email);
+	}
 }
