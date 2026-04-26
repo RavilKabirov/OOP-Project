@@ -10,6 +10,13 @@ public class Mark {
 
     public Mark() {
     }
+    public Long getEnrollmentId(){
+    return enrollmentId;
+}
+
+    public void setEnrollmentId(Long a){
+    this.enrollmentId=a;
+}
     public double calculateTotal(){
         return firstAttestation+secondAttestation+finalExam;
     }
