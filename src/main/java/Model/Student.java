@@ -6,111 +6,72 @@ import java.util.*;
  * 
  */
 public abstract class Student extends User {
-
-    /**
-     * Default constructor
-     */
-    public Student() {
-    }
-
-    /**
-     * 
-     */
     private String studentId;
-
-    /**
-     * 
-     */
     private Major major;
-
-    /**
-     * 
-     */
     private int yearOfStudy;
-
-    /**
-     * 
-     */
     private double gpa;
-
-    /**
-     * 
-     */
     private int totalCredits;
-
-    /**
-     * 
-     */
     private List<Enrollment> curEnrollments;
-
-    /**
-     * 
-     */
     private Transcript transcript;
 
-
-
-
-
+    public Student() {
+    }
 
     /**
      * @return
      */
     public String getStudentId() {
         // TODO implement here
-        return "";
+        return studentId;
     }
 
     /**
      * @param value
      */
     public void setStudentId(String value) {
-        // TODO implement here
+        this.studentId=value;
     }
 
     /**
      * @return
      */
     public Major getMajor() {
-        // TODO implement here
-        return null;
+        return major;
     }
 
     /**
      * @param value
      */
     public void setMajor(Major value) {
-        // TODO implement here
+        this.major=value;
     }
 
     /**
      * @return
      */
     public int getYearOfStudy() {
-        // TODO implement here
-        return 0;
+        return yearOfStudy;
     }
 
     /**
      * @param value
      */
     public void setYearOfStudy(int value) {
-        // TODO implement here
+        this.yearOfStudy=value;
     }
 
     /**
      * @return
      */
     public double getGpa() {
-        // TODO implement here
-        return 0.0d;
+        return gpa;
     }
 
     /**
      * @param value
      */
     public void setGpa(double value) {
-        // TODO implement here
+        this.gpa=value;
     }
 
     /**
@@ -125,15 +86,14 @@ public abstract class Student extends User {
      * @return
      */
     public int getTotalCredits() {
-        // TODO implement here
-        return 0;
+        return totalCredits;
     }
 
     /**
      * @param value
      */
     public void setTotalCredits(int value) {
-        // TODO implement here
+        this.totalCredits=value;
     }
 
 }
