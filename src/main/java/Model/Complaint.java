@@ -1,192 +1,83 @@
-
-import java.io.*;
 import java.util.*;
+import java.time.*;
 
-/**
- * 
- */
-public class Complaint {
-
-    /**
-     * Default constructor
-     */
-    public Complaint() {
-    }
-
-    /**
-     * 
-     */
+public class Complaint{
     private Long id;
-
-    /**
-     * 
-     */
     private Teacher sender;
-
-    /**
-     * 
-     */
     private ManagerForComplaint recipient;
-
-    /**
-     * 
-     */
     private Student targetStudent;
-
-    /**
-     * 
-     */
     private UrgencyLevel urgencyLevel;
-
-    /**
-     * 
-     */
     private ComplaintStatus complaintStatus;
-
-    /**
-     * 
-     */
     private LocalDateTime createdAt;
-
-    /**
-     * 
-     */
     private LocalDateTime updatedAt;
 
+    public Complaint(){}
 
-    /**
-     * @return
-     */
-    public Long getId() {
-        // TODO implement here
-        return null;
+    public Long getId(){
+        return id;
+    }
+    public void setId(Long a){
+        id=a;
+    }
+    public Teacher getSender(){
+        return sender;
+    }
+    public void setSender(Teacher a){
+        sender=a;
+    }
+    public ManagerForComplaint getRecipient(){
+        return recipient;
     }
 
-    /**
-     * @param value
-     */
-    public void setId(Long value) {
-        // TODO implement here
+    public void setRecipient(ManagerForComplaint a){
+        recipient=a;
     }
 
-    /**
-     * @return
-     */
-    public Teacher getSender() {
-        // TODO implement here
-        return null;
+    public Student getTargetStudent(){
+        return targetStudent;
     }
 
-    /**
-     * @param value
-     */
-    public void setSender(Teacher value) {
-        // TODO implement here
+    public void setTargetStudent(Student a){
+        targetStudent=a;
     }
 
-    /**
-     * @return
-     */
-    public ManagerForComplaint getRecipient() {
-        // TODO implement here
-        return null;
+    public UrgencyLevel getUrgencyLevel(){
+        return urgencyLevel;
     }
 
-    /**
-     * @param value
-     */
-    public void setRecipient(ManagerForComplaint value) {
-        // TODO implement here
+    public void setUrgencyLevel(UrgencyLevel a){
+        urgencyLevel=a;
     }
 
-    /**
-     * @return
-     */
-    public Student getTargetStudent() {
-        // TODO implement here
-        return null;
+    public ComplaintStatus getComplaintStatus(){
+        return complaintStatus;
     }
 
-    /**
-     * @param value
-     */
-    public void setTargetStudent(Student value) {
-        // TODO implement here
+    public void setComplaintStatus(ComplaintStatus a){
+        complaintStatus=a;
     }
 
-    /**
-     * @return
-     */
-    public UrgencyLevel getUrgencyLevel() {
-        // TODO implement here
-        return null;
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime a){
+        createdAt=a;
+    }
+    public LocalDateTime getUpdatedAt(){
+        return updatedAt;
+    }
+    public void setUpdatedAt(LocalDateTime a){
+        updatedAt=a;
+    }
+    public void updateStatus(ComplaintStatus a){
+        complaintStatus=a;
+        updatedAt=LocalDateTime.now();
+    }
+    public Boolean isResolved(){
+        return complaintStatus==ComplaintStatus.RESOLVED;
     }
 
-    /**
-     * @param value
-     */
-    public void setUrgencyLevel(UrgencyLevel value) {
-        // TODO implement here
+    public String toString(){
+        return sender+" -> "+targetStudent;
     }
-
-    /**
-     * @return
-     */
-    public ComplaintStatus getComplaintStatus() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setComplaintStatus(ComplaintStatus value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public LocalDateTime getCreatedAt() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setCreatedAt(LocalDateTime value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public LocalDateTime getUpdatedAt() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setUpdatedAt(LocalDateTime value) {
-        // TODO implement here
-    }
-
-    /**
-     * @param status
-     */
-    public void updateStatus(ComplaintStatus status) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public Boolean isResolved() {
-        // TODO implement here
-        return null;
-    }
-
 }
