@@ -1,196 +1,111 @@
-
 import java.io.*;
 import java.util.*;
+import java.time.LocalDateTime;
 
-/**
- * 
- */
-public class Message {
+public class Message{
 
-    /**
-     * Default constructor
-     */
-    public Message() {
-    }
-
-    /**
-     * 
-     */
     private Long id;
-
-    /**
-     * 
-     */
     private Employee sender;
-
-    /**
-     * 
-     */
-    private Employee resipient;
-
-    /**
-     * 
-     */
+    private Employee recipient;
     private String subject;
-
-    /**
-     * 
-     */
     private String body;
-
-    /**
-     * 
-     */
     private LocalDateTime sentAt;
-
-    /**
-     * 
-     */
     private Boolean isRead;
-
-    /**
-     * 
-     */
     private Boolean isDeletedBySender;
-
-    /**
-     * 
-     */
     private Boolean isDeletedByRecipient;
 
-
-
-    /**
-     * @return
-     */
-    public Long getId() {
-        // TODO implement here
-        return null;
+    public Message(){
+        this.isRead=false;
+        this.isDeletedBySender=false;
+        this.isDeletedByRecipient=false;
+        this.sentAt=LocalDateTime.now();
     }
 
-    /**
-     * @param value
-     */
-    public void setId(Long value) {
-        // TODO implement here
+    public Long getId(){
+        return id;
+    }
+    public void setId(Long a){
+        this.id=a;
+    }
+    public Employee getSender(){
+        return sender;
+    }
+    public void setSender(Employee a){
+        this.sender=a;
+    }
+    public Employee getRecipient(){
+        return recipient;
+    }
+    public void setRecipient(Employee a){
+        this.recipient=a;
     }
 
-    /**
-     * @return
-     */
-    public Employee getSender() {
-        // TODO implement here
-        return null;
+    public String getSubject(){
+        return subject;
     }
 
-    /**
-     * @param value
-     */
-    public void setSender(Employee value) {
-        // TODO implement here
+    public void setSubject(String a){
+        this.subject=a;
+    }
+    public String getBody(){
+        return body;
+    }
+    public void setBody(String a){
+        this.body=a;
+    }
+    public LocalDateTime getSentAt(){
+        return sentAt;
     }
 
-    /**
-     * @return
-     */
-    public Employee getResipient() {
-        // TODO implement here
-        return null;
+    public void setSentAt(LocalDateTime a){
+        this.sentAt=a;
     }
 
-    /**
-     * @param value
-     */
-    public void setResipient(Employee value) {
-        // TODO implement here
+    public Boolean getIsRead(){
+        return isRead;
+    }
+    public void setIsRead(Boolean a){
+        this.isRead=a;
+    }
+    public Boolean getIsDeletedBySender(){
+        return isDeletedBySender;
     }
 
-    /**
-     * @return
-     */
-    public String getSubject() {
-        // TODO implement here
-        return "";
+    public void setIsDeletedBySender(Boolean a){
+        this.isDeletedBySender=a;
     }
 
-    /**
-     * @param value
-     */
-    public void setSubject(String value) {
-        // TODO implement here
+    public Boolean getIsDeletedByRecipient(){
+        return isDeletedByRecipient;
     }
 
-    /**
-     * @return
-     */
-    public String getBody() {
-        // TODO implement here
-        return "";
+    public void setIsDeletedByRecipient(Boolean a){
+        this.isDeletedByRecipient=a;
     }
 
-    /**
-     * @param value
-     */
-    public void setBody(String value) {
-        // TODO implement here
+    public void markAsRead(){
+        this.isRead=true;
     }
 
-    /**
-     * @return
-     */
-    public LocalDateTime getSentAt() {
-        // TODO implement here
-        return null;
+    public void deleteForSender(){
+        this.isDeletedBySender=true;
     }
 
-    /**
-     * @param value
-     */
-    public void setSentAt(LocalDateTime value) {
-        // TODO implement here
+    public void deleteForRecipient(){
+        this.isDeletedByRecipient=true;
     }
 
-    /**
-     * @return
-     */
-    public Boolean getIsRead() {
-        // TODO implement here
-        return null;
+    public boolean isVisibleTo(Employee a){
+        if(a==sender){
+            return !isDeletedBySender;
+        }
+        if(a==recipient){
+            return !isDeletedByRecipient;
+        }
+        return false;
     }
 
-    /**
-     * @param value
-     */
-    public void setIsRead(Boolean value) {
-        // TODO implement here
+    public String toString(){
+        return id+" "+subject;
     }
-
-    /**
-     * 
-     */
-    public void markAsRead() {
-        // TODO implement here
-    }
-
-    /**
-     * 
-     */
-    public void deleteForSender() {
-        // TODO implement here
-    }
-
-    /**
-     * 
-     */
-    public void deleteForRecipient() {
-        // TODO implement here
-    }
-
-    /**
-     * 
-     */
-    public void isVisibleTo() {
-        // TODO implement here
-    }
-
 }
