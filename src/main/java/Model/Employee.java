@@ -1,64 +1,43 @@
-
 import java.io.*;
 import java.util.*;
 
 /**
  * 
  */
-public class Employee extends User {
-
-    /**
-     * Default constructor
-     */
+public abstract class Employee extends User {
+    private String employeeId;
+    private Department department;
+    private MessageRepository messages;
+    
     public Employee() {
     }
-
-    /**
-     * 
-     */
-    private String employeeId;
-
-    /**
-     * 
-     */
-    private Department department;
-
-    /**
-     * 
-     */
-    private MessageRepository messages;
-
-
-
 
     /**
      * @return
      */
     public String getEmployeeId() {
-        // TODO implement here
-        return "";
+        return employeeId;
     }
 
     /**
      * @param value
      */
     public void setEmployeeId(String value) {
-        // TODO implement here
+        this.employeeId=value;
     }
 
     /**
      * @return
      */
     public Department getDepartment() {
-        // TODO implement here
-        return null;
+        return department;
     }
 
     /**
      * @param value
      */
     public void setDepartment(Department value) {
-        // TODO implement here
+        this.department=value;
     }
 
     /**
@@ -66,7 +45,7 @@ public class Employee extends User {
      */
     public List<Message> getSentMessages() {
         // TODO implement here
-        return null;
+        return messages.getSentMessages();
     }
 
     /**
@@ -74,7 +53,7 @@ public class Employee extends User {
      */
     public List<Message> getInboxMessages() {
         // TODO implement here
-        return null;
+        return messages.getInboxMessages();
     }
 
 }
