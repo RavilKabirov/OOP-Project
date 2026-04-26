@@ -9,7 +9,8 @@ public abstract class Employee extends User {
     private Department department;
     private MessageRepository messages;
     
-    public Employee() {
+    public Employee(String email, String firstName, String lastName) {
+        super(email, firstName, lastName);
     }
 
     /**
