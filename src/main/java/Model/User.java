@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * 
  */
-public abstract class User {
+public class User {
 
     /**
      * Default constructor
@@ -51,7 +51,7 @@ public abstract class User {
     /**
      * 
      */
-    public void getFullName() {
+    public void setFullName() {
         // TODO implement here
     }
 
@@ -66,7 +66,7 @@ public abstract class User {
     /**
      * @return
      */
-    public void getEmail() {
+    public String getEmail() {
         // TODO implement here
         return null;
     }
@@ -77,7 +77,7 @@ public abstract class User {
      */
     public void setEmail(String email) {
         // TODO implement here
-        return null;
+        return;
     }
 
     /**
@@ -87,7 +87,7 @@ public abstract class User {
      */
     public void changePassword(String oldPass, String newPass) {
         // TODO implement here
-        return null;
+        return;
     }
 
     /**
@@ -99,14 +99,6 @@ public abstract class User {
         return false;
     }
 
-    /**
-     * @param raw 
-     * @return
-     */
-    private String hashPassword(String raw) {
-        // TODO implement here
-        return "";
-    }
 
     /**
      * @return
@@ -123,4 +115,16 @@ public abstract class User {
         // TODO implement here
     }
 
+    public void switchActive(){
+        return;
+    }
+    public Long getId(){
+        return null;
+    }
+    public void setId(long id){
+        return;
+    }
+    public boolean isActive(){
+        return this.isActive;
+    }
 }

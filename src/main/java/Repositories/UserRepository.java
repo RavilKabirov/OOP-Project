@@ -1,75 +1,57 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-import java.io.*;
-import java.util.*;
-
-/**
- * 
- */
 public class UserRepository {
 
-    /**
-     * Default constructor
-     */
-    public UserRepository() {
-    }
-
-    /**
-     * 
-     */
     private List<User> users;
 
-    /**
-     * @param User
-     */
-    public void save(void User) {
-        // TODO implement here
+    public UserRepository() {
+        this.users = new ArrayList<>();
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public User findById(Long id) {
-        // TODO implement here
-        return null;
+    public User save(User user) {
+        if (user.getId() == null) {
+            user.setId(generateId());
+        } else {
+            Optional<User> existing = findById(user.getId());
+            existing.ifPresent(users::remove);
+        }
+        users.add(user);
+        return user;
     }
 
-    /**
-     * @return
-     */
+    public Optional<User> findById(Long id) {
+        return users.stream()
+                .filter(u -> u.getId().equals(id))
+                .findFirst();
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return users.stream()
+                .filter(u -> u.getEmail().equalsIgnoreCase(email))
+                .findFirst();
+    }
+
     public List<User> getUsers() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>(users);
     }
 
-    /**
-     * @param value
-     */
     public void setUsers(List<User> value) {
-        // TODO implement here
+        this.users = new ArrayList<>(value);
     }
 
-    /**
-     * @param id
-     */
     public void deleteById(Long id) {
-        // TODO implement here
+        users.removeIf(u -> u.getId().equals(id));
     }
 
-    /**
-     * @param email 
-     * @return
-     */
-    public void findByEmail(String email) {
-        // TODO implement here
-        return null;
+    public boolean existsByEmail(String email) {
+        return users.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(email));
     }
-
-    /**
-     * 
-     */
-    public void generateId() {
-        // TODO implement here
+    private Long generateId() {
+        return users.stream()
+                .mapToLong(User::getId)
+                .max()
+                .orElse(0L) + 1;
     }
-
 }
