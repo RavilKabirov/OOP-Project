@@ -2,64 +2,44 @@
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class ManagerRepository {
-
-    /**
-     * Default constructor
-     */
-    public ManagerRepository() {
-    }
-
-    /**
-     * 
-     */
     private List<Manager> managers;
-
-    /**
-     * @param manager 
-     * @return
-     */
+    
+    public ManagerRepository() {
+    	this.managers=new ArrayList<>();
+    }
     public Manager save(Manager manager) {
-        // TODO implement here
-        return null;
+        String empId = manager.getEmployeeId();
+        Optional<Manager> existing = findByEmployeeId(empId);
+        if (existing.isPresent()) {
+        	managers.remove(existing.get());
+        }
+        managers.add(manager);
+        return manager;
     }
 
-    /**
-     * @param employeeId 
-     * @return
-     */
     public Optional<Manager> findByEmployeeId(String employeeId) {
-        // TODO implement here
-        return null;
+        return managers.stream()
+        		.filter(m -> m.getEmployeeId().equals(employeeId))
+        		.findFirst();
     }
 
-    /**
-     * @param level 
-     * @return
-     */
     public List<Manager> findByLevel(ManagerLevel level) {
-        // TODO implement here
-        return null;
+        List<Manager> result = new ArrayList<>();
+        for (Manager m : managers) {
+        	if (m.getLevel().equals(level)) {
+        		result.add(m);
+        	}
+        }
+        return result;
     }
 
-    /**
-     * @return
-     */
     public List<Manager> findAll() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>(managers);
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+        managers.removeIf(m -> m.getEmployeeId().equals(employeeId));
     }
 
 }
