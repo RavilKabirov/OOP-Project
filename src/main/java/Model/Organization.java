@@ -1,145 +1,73 @@
-
 import java.io.*;
 import java.util.*;
+import java.time.*;
 
-/**
- * 
- */
-public class Organization {
+public class Organization{
 
-    /**
-     * Default constructor
-     */
-    public Organization() {
-    }
-
-    /**
-     * 
-     */
     private Long id;
-
-    /**
-     * 
-     */
     private String name;
-
-    /**
-     * 
-     */
     private String description;
-
-    /**
-     * 
-     */
     private LocalDateTime foundedAt;
-
-    /**
-     * 
-     */
     private Boolean isActive;
-
-    /**
-     * 
-     */
     private Student leader;
+    private List<Membership>members;
 
-
-    /**
-     * @return
-     */
-    public Long getId() {
-        // TODO implement here
-        return null;
+    public Organization(){
+        members=new ArrayList<>();
+    }
+    public Long getId(){
+        return id;
+    }
+    public void setId(Long a){
+        id=a;
+    }
+    public String getName(){
+        return name;
     }
 
-    /**
-     * @param value
-     */
-    public void setId(Long value) {
-        // TODO implement here
+    public void setName(String a){
+        name=a;
+    }
+    public String getDescription(){
+        return description;
     }
 
-    /**
-     * @return
-     */
-    public String getName() {
-        // TODO implement here
-        return "";
+    public void setDescription(String a){
+        description=a;
     }
 
-    /**
-     * @param value
-     */
-    public void setName(String value) {
-        // TODO implement here
+    public LocalDateTime getFoundedAt(){
+        return foundedAt;
+    }
+    public void setFoundedAt(LocalDateTime a){
+        foundedAt=a;
+    }
+    public Boolean getIsActive(){
+        return isActive;
+    }
+    public void setIsActive(Boolean a){
+        isActive=a;
     }
 
-    /**
-     * @return
-     */
-    public String getDescription() {
-        // TODO implement here
-        return "";
+    public Student getLeader(){
+        return leader;
     }
 
-    /**
-     * @param value
-     */
-    public void setDescription(String value) {
-        // TODO implement here
+    public void setLeader(Student a){
+        leader=a;
+    }
+    public List<Membership>getMembers(){
+        return members;
     }
 
-    /**
-     * @return
-     */
-    public LocalDateTime getFoundedAt() {
-        // TODO implement here
-        return null;
+    public void addMember(Membership a){
+        if(a!=null){
+            members.add(a);
+        }
     }
 
-    /**
-     * @param value
-     */
-    public void setFoundedAt(LocalDateTime value) {
-        // TODO implement here
+    @Override
+    public String toString(){
+        return name+' '+leader;
     }
-
-    /**
-     * @return
-     */
-    public Boolean getIsActive() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setIsActive(Boolean value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public Student getLeader() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setLeader(Student value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public List<Membership> getMembers() {
-        // TODO implement here
-        return null;
-    }
-
 }
