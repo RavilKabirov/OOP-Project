@@ -1,132 +1,56 @@
-
-import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
-public class Membership {
-
-    /**
-     * Default constructor
-     */
-    public Membership() {
-    }
-
-    /**
-     * 
-     */
+public class Membership{
     private Long id;
-
-    /**
-     * 
-     */
     private Student student;
-
-    /**
-     * 
-     */
-    private Organization Organization;
-
-    /**
-     * 
-     */
+    private Organization organization;
     private MembershipRole role;
-
-    /**
-     * 
-     */
     private MembershipStatus status;
 
+    public Membership(){}
 
-
-    /**
-     * @return
-     */
-    public Long getId() {
-        // TODO implement here
-        return null;
+    public Long getId(){
+        return id;
+    }
+    public void setId(Long a){
+        id=a;
+    }
+    public Student getStudent(){
+        return student;
+    }
+    public void setStudent(Student a){
+        student=a;
+    }
+    public Organization getOrganization(){
+        return organization;
     }
 
-    /**
-     * @param value
-     */
-    public void setId(Long value) {
-        // TODO implement here
+    public void setOrganization(Organization a){
+        organization=a;
+    }
+    public MembershipRole getRole(){
+        return role;
     }
 
-    /**
-     * @return
-     */
-    public Student getStudent() {
-        // TODO implement here
-        return null;
+    public void setRole(MembershipRole a){
+        role=a;
+    }
+    public MembershipStatus getStatus(){
+        return status;
     }
 
-    /**
-     * @param value
-     */
-    public void setStudent(Student value) {
-        // TODO implement here
+    public void setStatus(MembershipStatus a){
+        status=a;
     }
 
-    /**
-     * @return
-     */
-    public Organization getOrganization() {
-        // TODO implement here
-        return null;
+    public void activate(){
+        status=MembershipStatus.ACTIVE;
+    }
+    public void deactivate(){
+        status=MembershipStatus.INACTIVE;
     }
 
-    /**
-     * @param value
-     */
-    public void setOrganization(Organization value) {
-        // TODO implement here
+    public String toString(){
+        return student+" "+role;
     }
-
-    /**
-     * @return
-     */
-    public MembershipRole getRole() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setRole(MembershipRole value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public MembershipStatus getStatus() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setStatus(MembershipStatus value) {
-        // TODO implement here
-    }
-
-    /**
-     * 
-     */
-    public void activate() {
-        // TODO implement here
-    }
-
-    /**
-     * 
-     */
-    public void deactivate() {
-        // TODO implement here
-    }
-
 }
