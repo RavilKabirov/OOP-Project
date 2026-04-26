@@ -6,60 +6,46 @@ import java.util.*;
  * 
  */
 public class Teacher extends Employee {
-
-    /**
-     * Default constructor
-     */
-    public Teacher() {
-    }
-
-    /**
-     * 
-     */
     private List<Course> courses;
-
-    /**
-     * 
-     */
     private TeacherPosition teacherPosition;
 
-
+    public Teacher() {
+    	this.courses=new ArrayList<>();
+    }
 
     /**
      * @return
      */
     public List<Course> getCourses() {
-        // TODO implement here
-        return null;
+        return courses;
     }
 
     /**
      * @param value
      */
     public void addCourse(Course value) {
-        // TODO implement here
+        courses.add(value);
     }
 
     /**
      * @param value
      */
     public void removeCourse(Course value) {
-        // TODO implement here
+        courses.remove(value);
     }
 
     /**
      * @return
      */
     public TeacherPosition getTeacherPosition() {
-        // TODO implement here
-        return null;
+        return teacherPosition;
     }
 
     /**
      * @param value
      */
     public void setTeacherPosition(TeacherPosition value) {
-        // TODO implement here
+        this.teacherPosition=value;
     }
 
 }
