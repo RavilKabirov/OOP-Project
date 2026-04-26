@@ -1,10 +1,7 @@
-import java.io.*;
-import java.util.*;
 import java.time.LocalDateTime;
-/**
- * 
- */
-public abstract class User {
+import java.util.Objects;
+
+public class User {
     private Long Id;
     private String firstName;
     private String lastName;
@@ -12,118 +9,101 @@ public abstract class User {
     private String passwordHash;
     private LocalDateTime createdAt;
     private boolean isActive;
-    
+
+    // Конструктор, используемый сервисом регистрации
+    public User(String email, String firstName, String lastName) {
+        this.Email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.createdAt = LocalDateTime.now();
+        this.isActive = true;
+    }
+
+    // Пустой конструктор (для репозиториев или наследования)
     public User() {
     }
 
-    public void setFullName(String firstName, String lastName) {
-        this.firstName=firstName;
-        this.lastName=lastName;
+    // Геттеры и сеттеры для имени/фамилии
+    public String getFirstName() {
+        return firstName;
     }
 
-    /**
-     * @return
-     */
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setFullName(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
 
-    /**
-     * @return
-     */
+    // Email
     public String getEmail() {
         return Email;
     }
 
-    /**
-     * @param email 
-     * @return
-     */
     public void setEmail(String email) {
-        this.Email=email;
+        this.Email = email;
     }
 
-    /**
-     * @param oldPass 
-     * @param newPass 
-     * @return
-     */
-    public void changePassword(String oldPass, String newPass) {
-        if(checkPassword(oldPass)) {
-        	this.passwordHash=hashPassword(newPass);
-        }
-    }
-
-    /**
-     * @param rawPass 
-     * @return
-     */
-    
-    private String hashPassword(String raw) {
-    	return Integer.toHexString(raw.hashCode());
-    }
-    
-    public boolean checkPassword(String rawPass) {
-        return passwordHash.equals(hashPassword(rawPass));
-    }
-
-
-    /**
-     * @return
-     */
+    // Прямой доступ к хешу – используется сервисом, не содержит своего хеширования
     public String getPasswordHash() {
         return passwordHash;
     }
 
-    /**
-     * @param value
-     */
-    public void setPassword(String value) {
-        this.passwordHash=hashPassword(value);
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public void switchActive(){
-        this.isActive=!isActive;;
-    }
-    
-    public void setId(long id){
-        this.Id=id;
-    }
-    public boolean isActive(){
-        return this.isActive;
+    // Активность
+    public boolean isActive() {
+        return isActive;
     }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    public void setActive(boolean active) {
+        this.isActive = active;
+    }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+    public void switchActive() {
+        this.isActive = !this.isActive;
+    }
 
-	public Long getId() {
-		return Id;
-	}
+    // ID и дата создания
+    public Long getId() {
+        return Id;
+    }
 
-	public void setId(Long id) {
-		Id = id;
-	}
-	
-	@Override
-	public String toString() {
-		return getFullName() + " | " + Email;
-	}
-	
-	@Override
-	public boolean equals(Object o) {
-		if(this==o) return true;
-		if(!(o instanceof User)) return false;
-		User user = (User) o;
-		return Objects.equals(Id, user.Id) && Objects.equals(Email, user.Email);
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(Id,Email);
-	}
+    public void setId(Long id) {
+        this.Id = id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return getFullName() + " | " + Email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return Objects.equals(Id, user.Id) && Objects.equals(Email, user.Email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Id, Email);
+    }
 }

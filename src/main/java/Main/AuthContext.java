@@ -3,7 +3,7 @@ public class AuthContext {
 
         public static void setCurrentUser(User user) { currentUser = user; }
         public static User getCurrentUser() {
-            if (currentUser == null) throw new IllegalStateException("User is not authenticated");
+            
             return currentUser;
         }
         public static boolean isAdmin() { return currentUser instanceof Admin; }

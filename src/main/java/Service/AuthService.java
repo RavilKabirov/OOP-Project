@@ -30,8 +30,8 @@ public class AuthService {
         } else {
             user = new User(email, firstName, lastName);
         }
-        user.setPassword(passwordEncoder.encode(password));
-        user.switchActive();
+        user.setPasswordHash(passwordEncoder.encode(password));
+        
 
         return userRepository.save(user);
     }
@@ -40,7 +40,7 @@ public class AuthService {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User is not found"));
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash()))
             throw new IllegalArgumentException("Old password is incorrect");
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 

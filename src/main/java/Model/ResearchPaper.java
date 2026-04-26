@@ -1,197 +1,83 @@
-
 import java.io.*;
 import java.util.*;
+import java.time.LocalDateTime;
 
-/**
- * 
- */
-public class ResearchPaper {
-
-    /**
-     * Default constructor
-     */
-    public ResearchPaper() {
-    }
-
-    /**
-     * 
-     */
+public class ResearchPaper{
     private Long id;
-
-    /**
-     * 
-     */
     private String title;
-
-    /**
-     * 
-     */
     private String text;
-
-    /**
-     * 
-     */
     private List<String> keywords;
-
-    /**
-     * 
-     */
     private LocalDateTime publicationDate;
-
-    /**
-     * 
-     */
     private PaperType type;
-
-    /**
-     * 
-     */
     public ResearchStatus status;
-
-    /**
-     * 
-     */
     private LocalDateTime createdAt;
-
-    /**
-     * 
-     */
     private LocalDateTime updatedAt;
 
-
-    /**
-     * @return
-     */
-    public Long getId() {
-        // TODO implement here
-        return null;
+    public ResearchPaper(){
+        this.keywords=new ArrayList<>();
+        this.createdAt=LocalDateTime.now();
+        this.updatedAt=LocalDateTime.now();
     }
 
-    /**
-     * @param value
-     */
-    public void setId(Long value) {
-        // TODO implement here
+    public Long getId(){
+        return id;
+    }
+    public void setId(Long a){
+        this.id=a;
+    }
+    public String getTitle(){
+        return title;
+    }
+    public void setTitle(String a){
+        this.title=a;
+    }
+    public String getText(){
+        return text;
+    }
+    public void setText(String a){
+        this.text=a;
+    }
+    public List<String> getKeywords(){
+        return keywords;
     }
 
-    /**
-     * @return
-     */
-    public String getTitle() {
-        // TODO implement here
-        return "";
+    public void setKeywords(List<String> a){
+        this.keywords=a;
+    }
+    public LocalDateTime getPublicationDate(){
+        return publicationDate;
+    }
+    public void setPublicationDate(LocalDateTime a){
+        this.publicationDate=a;
+    }
+    public PaperType getType(){
+        return type;
+    }
+    public void setType(PaperType a){
+        this.type=a;
+    }
+    public ResearchStatus getStatus(){
+        return status;
+    }
+    public void setStatus(ResearchStatus a){
+        this.status=a;
+    }
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime a){
+        this.createdAt=a;
     }
 
-    /**
-     * @param value
-     */
-    public void setTitle(String value) {
-        // TODO implement here
+    public LocalDateTime getUpdatedAt(){
+        return updatedAt;
     }
 
-    /**
-     * @return
-     */
-    public String getText() {
-        // TODO implement here
-        return "";
+    public void setUpdatedAt(LocalDateTime a){
+        this.updatedAt=a;
     }
 
-    /**
-     * @param value
-     */
-    public void setText(String value) {
-        // TODO implement here
+    public String toString(){
+        return id+" "+title;
     }
-
-    /**
-     * @return
-     */
-    public List<String> getKeywords() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setKeywords(List<String> value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public LocalDateTime getPublicationDate() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setPublicationDate(LocalDateTime value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public PaperType getType() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setType(PaperType value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public ResearchStatus getStatus() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setStatus(ResearchStatus value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public LocalDateTime getCreatedAt() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setCreatedAt(LocalDateTime value) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public LocalDateTime getUpdatedAt() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param value
-     */
-    public void setUpdatedAt(LocalDateTime value) {
-        // TODO implement here
-    }
-
 }

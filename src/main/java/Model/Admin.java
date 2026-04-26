@@ -10,18 +10,18 @@ public class Admin extends Employee {
     private AdminLevel accessLevel;
     private List<Permission> permissions;
     
-    public Admin() {}
+    
 
-    /**
-     * @return
-     */
+    public Admin(String email, String firstName, String lastName) {
+        super(email, firstName, lastName); 
+        this.permissions = new ArrayList<>();
+
+    }
     public Long getAdminId() {
         return adminId;
     }
 
-    /**
-     * @param value
-     */
+    
     public void setAdminId(Long value) {
         this.adminId=value;
     }

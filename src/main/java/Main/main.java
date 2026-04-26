@@ -29,9 +29,14 @@ public class main {
                 scanner.nextLine(); 
 
                 switch (choice) {
-                    case 1 -> handleLogin(scanner, authService);
-                    case 0 -> running = false;
-                    default -> System.out.println("Incorrect sign.");
+                    case 1:
+                        handleLogin(scanner, authService);
+                        break;
+                    case 0:
+                        running = false;
+                        break;
+                    default:
+                         System.out.println("Incorrect sign.");
                 }
             } else {
                 User current = AuthContext.getCurrentUser();
@@ -48,20 +53,27 @@ public class main {
                 scanner.nextLine();
 
                 switch (choice) {
-                    case 1 -> handleChangePassword(scanner, authService, current);
-                    case 2 -> showProfile(current);
-                    case 3 -> {
+                    case 1:
+                        handleChangePassword(scanner, authService, current);
+                        break;
+                    case 2:
+                        showProfile(current);
+                        break;
+                    case 3: 
                         if (AuthContext.isAdmin()) {
                             handleRegistration(scanner, authService);
                         } else {
                             System.out.println("incorrect.");
                         }
-                    }
-                    case 0 -> {
+                        break;
+                    
+                    case 0: 
                         AuthContext.logout();
                         System.out.println("You are signed out.");
-                    }
-                    default -> System.out.println("Incorrect input.");
+                        break;
+                    
+                    default:
+                        System.out.println("Incorrect input.");
                 }
             }
         }
