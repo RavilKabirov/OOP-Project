@@ -1,65 +1,36 @@
-
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
-public class MarkRepository {
-
-    /**
-     * Default constructor
-     */
-    public MarkRepository() {
-    }
-
-    /**
-     * 
-     */
+public class MarkRepository{
     private List<Mark> marks;
 
-    /**
-     * @param mark 
-     * @return
-     */
-    public Mark save(Mark mark) {
-        // TODO implement here
+    public MarkRepository(){
+        this.marks=new ArrayList<>();
+    }
+
+    public Mark save(Mark a){
+        marks.add(a);
+        return a;
+    }
+
+    public Optional<Mark> findById(Long a){
+        return findByEnrollment(a);
+    }
+
+    public Mark findByEnrollment(Long a){
+        for(Mark mark:marks){
+            if(mark.getEnrollmentId()!=null&&mark.getEnrollmentId().equals(a)){
+                return mark;
+            }
+        }
         return null;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public Optional<Mark> findById(Long id) {
-        // TODO implement here
-        return null;
+    public List<Mark> findAll(){
+        return marks;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public Mark findByEnrollment(Long id) {
-        // TODO implement here
-        return null;
+    public void deleteByEnrollmentId(Long a){
+        marks.removeIf(mark->mark.getEnrollmentId()!=null&&mark.getEnrollmentId().equals(a));
     }
-
-    /**
-     * @return
-     */
-    public List<Mark> findAll() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param id 
-     * @return
-     */
-    public void deleteByEnrollmentId(Long id) {
-        // TODO implement here
-        return null;
-    }
-
-}
+}    
