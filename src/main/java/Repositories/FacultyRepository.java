@@ -2,64 +2,43 @@
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class FacultyRepository {
-
-    /**
-     * Default constructor
-     */
-    public FacultyRepository() {
-    }
-
-    /**
-     * 
-     */
     public List<Faculty> faculties;
+    
+    public FacultyRepository() {
+    	this.faculties = new ArrayList<>();
+    }
 
-    /**
-     * @param faculty 
-     * @return
-     */
     public Faculty save(Faculty faculty) {
-        // TODO implement here
-        return null;
+        Optional<Faculty> existing = findById(faculty.getId());
+        if(existing.isPresent()) {
+        	faculties.remove(existing.get());
+        }
+        faculties.add(faculty);
+        return faculty;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public Optional<Faculty> findById(Long id) {
-        // TODO implement here
-        return null;
+        return faculties.stream()
+        		.filter(f -> f.getName().equals(name))
+        		.findFirst();
     }
 
-    /**
-     * @param name 
-     * @return
-     */
-    public Optional<Faculty> findByName(String name) {
-        // TODO implement here
-        return null;
+    public Optional<Manager> findByName(String name) {
+        for (Manager m : managers) {
+            if (m.getFullName().equalsIgnoreCase(name)) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
     }
-
-    /**
-     * @return
-     */
+    
     public List<Faculty> findAll() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>();
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+    public void deleteByEmployeeId(String employeeId) {
+        managers.removeIf(m -> m.getEmployeeId().equals(employeeId));
     }
 
 }
