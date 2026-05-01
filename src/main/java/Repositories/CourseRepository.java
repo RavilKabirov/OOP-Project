@@ -1,83 +1,70 @@
-
-import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class CourseRepository {
 
-    /**
-     * Default constructor
-     */
-    public CourseRepository() {
-    }
-
-    /**
-     * 
-     */
     private List<Course> courses;
+    private long nextId = 1;
 
-    /**
-     * @param course 
-     * @return
-     */
+    public CourseRepository() {
+        this.courses = new ArrayList<>();
+    }
+
     public Course save(Course course) {
-        // TODO implement here
-        return null;
+        Optional<Course> existing = findByCourseId(course.getCourseId());
+        if (existing.isPresent()) {
+            courses.remove(existing.get());
+        }
+        courses.add(course);
+        return course;
     }
 
-    /**
-     * @param courseId 
-     * @return
-     */
     public Optional<Course> findByCourseId(String courseId) {
-        // TODO implement here
-        return null;
+        return courses.stream()
+                .filter(c -> c.getCourseId().equals(courseId))
+                .findFirst();
     }
 
-    /**
-     * @param teacherId 
-     * @return
-     */
     public List<Course> findByTeacher(String teacherId) {
-        // TODO implement here
-        return null;
+        List<Course> result = new ArrayList<>();
+        for (Course c : courses) {
+            for (Teacher t : c.getTeachers()) {
+                if (t.getId() != null && t.getId().toString().equals(teacherId)) {
+                    result.add(c);
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param type 
-     * @return
-     */
     public List<Course> findByCourseType(CourseType type) {
-        // TODO implement here
-        return null;
+        List<Course> result = new ArrayList<>();
+        for (Course c : courses) {
+            if (type.equals(c.getCourseType())) {
+                result.add(c);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param titleKeyword 
-     * @return
-     */
     public List<Course> searchCourses(String titleKeyword) {
-        // TODO implement here
-        return null;
+        List<Course> result = new ArrayList<>();
+        String lower = titleKeyword.toLowerCase();
+        for (Course c : courses) {
+            if (c.getName() != null && c.getName().toLowerCase().contains(lower)) {
+                result.add(c);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @return
-     */
     public List<Course> findAll() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>(courses);
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+        if (id != null && id > 0 && id <= courses.size()) {
+            courses.remove(id.intValue() - 1);
+        }
     }
-
 }

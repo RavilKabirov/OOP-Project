@@ -1,93 +1,87 @@
-
-import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class EnrollmentRepository {
 
-    /**
-     * Default constructor
-     */
-    public EnrollmentRepository() {
-    }
-
-    /**
-     * 
-     */
     private List<Enrollment> enrollments;
+    private long nextId = 1;
 
-    /**
-     * @param enrollment 
-     * @return
-     */
+    public EnrollmentRepository() {
+        this.enrollments = new ArrayList<>();
+    }
+
     public Enrollment save(Enrollment enrollment) {
-        // TODO implement here
-        return null;
+        if (enrollment.getId() == null) {
+            enrollment.setId(nextId++);
+            enrollments.add(enrollment);
+        } else {
+            for (int i = 0; i < enrollments.size(); i++) {
+                if (enrollments.get(i).getId().equals(enrollment.getId())) {
+                    enrollments.set(i, enrollment);
+                    return enrollment;
+                }
+            }
+            enrollments.add(enrollment); 
+        }
+        return enrollment;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public Optional<Enrollment> findById(Long id) {
-        // TODO implement here
-        return null;
+        return enrollments.stream()
+                .filter(e -> e.getId() != null && e.getId().equals(id))
+                .findFirst();
     }
 
-    /**
-     * @param studentId 
-     * @return
-     */
     public List<Enrollment> findByStudent(String studentId) {
-        // TODO implement here
-        return null;
+        List<Enrollment> result = new ArrayList<>();
+        for (Enrollment e : enrollments) {
+            if (e.getStudent() != null && e.getStudent().getStudentId().equals(studentId)) {
+                result.add(e);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param courseId 
-     * @return
-     */
     public List<Enrollment> findByCourse(Long courseId) {
-        // TODO implement here
-        return null;
+        List<Enrollment> result = new ArrayList<>();
+        for (Enrollment e : enrollments) {
+            if (e.getCourse() != null && Objects.hashCode(e.getCourse()) == courseId.intValue()) {
+                result.add(e);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param sId 
-     * @param cId 
-     * @return
-     */
-    public Optional<Enrollment> findByStudentAndCourse(String sId, Long cId) {
-        // TODO implement here
-        return null;
+    public Optional<Enrollment> findByStudentAndCourse(String studentId, Long courseId) {
+        return enrollments.stream()
+                .filter(e -> e.getStudent() != null && e.getCourse() != null
+                        && e.getStudent().getStudentId().equals(studentId)
+                        && Objects.hashCode(e.getCourse()) == courseId.intValue())
+                .findFirst();
     }
 
-    /**
-     * @param status 
-     * @return
-     */
+    public Optional<Enrollment> findByStudentAndCourse(String studentId, Course course) {
+        return enrollments.stream()
+                .filter(e -> e.getStudent() != null && e.getCourse() != null
+                        && e.getStudent().getStudentId().equals(studentId)
+                        && e.getCourse() == course)
+                .findFirst();
+    }
+
     public List<Enrollment> findByStatus(EnrollmentStatus status) {
-        // TODO implement here
-        return null;
+        List<Enrollment> result = new ArrayList<>();
+        for (Enrollment e : enrollments) {
+            if (status.equals(e.getStatus())) {
+                result.add(e);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @return
-     */
     public List<Enrollment> findAll() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>(enrollments);
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+        enrollments.removeIf(e -> e.getId() != null && e.getId().equals(id));
     }
-
 }

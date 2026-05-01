@@ -14,7 +14,19 @@ public class Enrollment {
     public Enrollment() {
         this.enrollmentDate=LocalDateTime.now(); 
     }
-    public EnrollmentStatus getStatus() {
+    
+    
+    public Long getId() {
+		return id;
+	}
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+	public EnrollmentStatus getStatus() {
         return status;
     }
     public void setStatus(EnrollmentStatus value) {

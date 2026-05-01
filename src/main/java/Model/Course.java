@@ -17,7 +17,16 @@ public class Course{
     public String getCourseId(){
         return courseId;
     }
-    public void setCourseId(String value) {
+    
+    public CourseType getCourseType() {
+		return courseType;
+	}
+
+	public void setCourseType(CourseType courseType) {
+		this.courseType = courseType;
+	}
+
+	public void setCourseId(String value) {
         this.courseId=value;
     }
     public String getName(){

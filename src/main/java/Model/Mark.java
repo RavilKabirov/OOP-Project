@@ -8,7 +8,10 @@ public class Mark {
     private double finalExam;
     private Long enrollmentId;
 
-    public Mark() {
+    public Mark(double first, double second, double fin) {
+        this.firstAttestation = first;
+        this.secondAttestation = second;
+        this.finalExam = fin;
     }
     public Long getEnrollmentId(){
     return enrollmentId;
