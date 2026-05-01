@@ -15,6 +15,11 @@ public class main {
         runEnrollmentTests();
         System.out.println("\n========== End of Enrollment Tests ==========\n");
 
+        System.out.println("\n========== Mark Service Tests ==========\n");
+        runMarkTests();
+        System.out.println("\n========== End of Mark Tests ==========\n");
+
+
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
         System.out.println("=== University system ===");
@@ -172,6 +177,150 @@ public class main {
             System.out.println("  Correctly rejected grade: " + ex.getMessage());
         }
     }
+
+    private static void runMarkTests() {
+
+        // -- Repositories & services -----------------------------------------
+        StudentRepository    studentRepo   = new StudentRepository();
+        CourseRepository     courseRepo    = new CourseRepository();
+        EnrollmentRepository enrollRepo    = new EnrollmentRepository();
+        TeacherRepository    teacherRepo   = new TeacherRepository();
+        MarkRepository       markRepo      = new MarkRepository();
+
+        EnrollmentService enrollService =
+                new EnrollmentService(enrollRepo, studentRepo, courseRepo);
+        MarkService markService =
+                new MarkService(markRepo, enrollRepo, teacherRepo);
+
+        // -- Students --------------------------------------------------------
+        Student alice = new Student() {};
+        alice.setId(1L);
+        alice.setStudentId("S001");
+        alice.setFullName("Alice", "Smith");
+        studentRepo.save(alice);
+
+        Student bob = new Student() {};
+        bob.setId(2L);
+        bob.setStudentId("S002");
+        bob.setFullName("Bob", "Jones");
+        studentRepo.save(bob);
+
+        // -- Course ----------------------------------------------------------
+        Course math = new Course();
+        math.setCourseId("MATH101");
+        math.setName("Calculus I");
+        math.setCredits(4);
+        courseRepo.save(math);
+
+        // -- Teacher (Teacher is abstract via Employee; use anonymous subclass)
+     
+        Teacher teacher = new Teacher("newton@university.edu", "Isaac", "Newton");
+        teacher.setId(10L);                  
+        teacher.setEmployeeId("T001");        
+        teacherRepo.save(teacher);          
+
+        
+        Course math1 = courseRepo.findByCourseId("MATH101").orElseThrow();
+        teacher.addCourse(math1);
+        teacherRepo.save(teacher);            
+
+        Enrollment eAlice = enrollService.enrollStudent("S001", "MATH101");
+        Enrollment eBob   = enrollService.enrollStudent("S002", "MATH101");
+        // ── TEST 1: assign all three components for Alice ────────────────────
+        System.out.println("--- TEST 1: Assign mark components for Alice ---");
+        Mark aliceMark = markService.assignMark(
+                10L, "S001", "MATH101", 30.0, MarkType.FIRST_ATTESTATION, "Midterm 1");
+        System.out.println("  After 1st attestation : " + aliceMark);
+
+        markService.assignMark(
+                10L, "S001", "MATH101", 28.5, MarkType.SECOND_ATTESTATION, "Midterm 2");
+        System.out.println("  After 2nd attestation : " + aliceMark);
+
+        markService.assignMark(
+                10L, "S001", "MATH101", 35.0, MarkType.FINAL_EXAM, "Final exam");
+        System.out.println("  After final exam      : " + aliceMark);
+
+        // ── TEST 2: assign marks for Bob ─────────────────────────────────────
+        System.out.println("\n--- TEST 2: Assign marks for Bob ---");
+        Mark bobMark = markService.assignMark(
+                10L, "S002", "MATH101", 20.0, MarkType.FIRST_ATTESTATION, null);
+        markService.assignMark(
+                10L, "S002", "MATH101", 22.0, MarkType.SECOND_ATTESTATION, null);
+        markService.assignMark(
+                10L, "S002", "MATH101", 25.0, MarkType.FINAL_EXAM, null);
+        System.out.println("  Bob's mark: " + bobMark);
+
+        // ── TEST 3: calculateFinalGrade ──────────────────────────────────────
+        System.out.println("\n--- TEST 3: calculateFinalGrade ---");
+        System.out.printf("  Alice total: %.2f  (expect 93.50)%n",
+                markService.calculateFinalGrade("S001", "MATH101"));
+        System.out.printf("  Bob   total: %.2f  (expect 67.00)%n",
+                markService.calculateFinalGrade("S002", "MATH101"));
+
+        // ── TEST 4: getStudentMarks ──────────────────────────────────────────
+        System.out.println("\n--- TEST 4: getStudentMarks for Alice ---");
+        markService.getStudentMarks("S001", "MATH101")
+                   .forEach(m -> System.out.println("  " + m));
+
+        // ── TEST 5: getCourseMarks ───────────────────────────────────────────
+        System.out.println("\n--- TEST 5: getCourseMarks for MATH101 ---");
+        markService.getCourseMarks("MATH101")
+                   .forEach(m -> System.out.println("  " + m));
+
+        // ── TEST 6: getMarkStatistics ────────────────────────────────────────
+        System.out.println("\n--- TEST 6: getMarkStatistics ---");
+        MarkStatistics stats = markService.getMarkStatistics("MATH101");
+        System.out.println("  " + stats);
+
+        // ── TEST 7: updateMark via MarkUpdateRequest ─────────────────────────
+        System.out.println("\n--- TEST 7: updateMark with MarkUpdateRequest ---");
+        MarkUpdateRequest req = new MarkUpdateRequest(
+                MarkType.FINAL_EXAM, 40.0, "Grade corrected after appeal");
+        markService.updateMark(eAlice.getId(), req);
+        System.out.printf("  Alice new total: %.2f  (expect 98.50)%n",
+                markService.calculateFinalGrade("S001", "MATH101"));
+
+        // ── TEST 8: deleteMark ───────────────────────────────────────────────
+        System.out.println("\n--- TEST 8: deleteMark ---");
+        markService.deleteMark(eBob.getId());
+        List<Mark> bobAfterDelete = markService.getStudentMarks("S002", "MATH101");
+        System.out.println("  Bob's marks after delete (expect []): " + bobAfterDelete);
+
+        // ── TEST 9: unauthorised teacher guard ───────────────────────────────
+        System.out.println("\n--- TEST 9: Unauthorised teacher guard ---");
+        Teacher impostor = new Teacher("asdd@mail.com", "Dr.", "Fraud") ;
+        impostor.setId(99L);
+        impostor.setEmployeeId("T999");
+        teacherRepo.save(impostor);
+        try {
+            markService.assignMark(99L, "S001", "MATH101",
+                    50.0, MarkType.FIRST_ATTESTATION, null);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 10: MarkUpdateRequest rejects score > 100 ───────────────────
+        System.out.println("\n--- TEST 10: MarkUpdateRequest score out of range ---");
+        try {
+            new MarkUpdateRequest(MarkType.FINAL_EXAM, 110.0);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 11: updateMark on non-existent enrollment ───────────────────
+        System.out.println("\n--- TEST 11: updateMark on missing mark ---");
+        try {
+            markService.updateMark(9999L,
+                    new MarkUpdateRequest(MarkType.FIRST_ATTESTATION, 10.0));
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+    }
+
+
 
 
     private static int readInt(Scanner scanner) {

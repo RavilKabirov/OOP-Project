@@ -9,9 +9,14 @@ public class Teacher extends Employee {
     private List<Course> courses;
     private TeacherPosition teacherPosition;
 
-    public Teacher() {
-    	this.courses=new ArrayList<>();
-    }
+    
+ 
+    public Teacher(String email, String firstName, String lastName) {
+		super(email, firstName, lastName);
+		this.courses = new ArrayList<>();
+	}
+
+	
 
     /**
      * @return
