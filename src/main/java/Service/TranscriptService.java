@@ -1,67 +1,88 @@
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.*;
-import java.util.*;
-
-/**
- * 
- */
 public class TranscriptService {
 
-    /**
-     * Default constructor
-     */
-    public TranscriptService() {
+    private final EnrollmentRepository enrollmentRepository;
+    private final MarkRepository       markRepository;
+    private final StudentRepository    studentRepository;
+
+    public TranscriptService(EnrollmentRepository enrollmentRepository,
+                             MarkRepository markRepository,
+                             StudentRepository studentRepository) {
+        this.enrollmentRepository = enrollmentRepository;
+        this.markRepository       = markRepository;
+        this.studentRepository    = studentRepository;
     }
 
-    /**
-     * 
-     */
-    private EnrollmentRepository enrollmentRepository;
+    public Transcript generateTranscript(String studentId) {
+        Student student = requireStudent(studentId);
 
-    /**
-     * 
-     */
-    private MarkRepository markRepository;
+        Transcript transcript = new Transcript(student);
 
-    /**
-     * 
-     */
-    private StudentRepository studentRepository;
+        List<Enrollment> allEnrollments =
+                enrollmentRepository.findByStudent(student.getStudentId());
 
-    /**
-     * @param studentId 
-     * @return
-     */
-    public Transcript generateTranscript(Long studentId) {
-        // TODO implement here
-        return null;
+        for (Enrollment enrollment : allEnrollments) {
+
+            if (enrollment.getMark() == null && enrollment.getId() != null) {
+                Mark mark = markRepository.findByEnrollment(enrollment.getId());
+                if (mark != null) {
+                    enrollment.setMark(mark);
+                }
+            }
+            transcript.addEnrollment(enrollment);
+        }
+
+        System.out.println("[TranscriptService] Generated transcript for "
+                + student.getFullName()
+                + " — " + allEnrollments.size() + " enrollment(s), GPA="
+                + String.format("%.2f", transcript.calculateGPA()));
+
+        return transcript;
     }
 
-    /**
-     * @param studentId 
-     * @return
-     */
-    public List<Enrollment> getCompletedCourses(Long studentId) {
-        // TODO implement here
-        return null;
+    public List<Enrollment> getCompletedCourses(String studentId) {
+        Student student = requireStudent(studentId);
+        List<Enrollment> completed = new ArrayList<>();
+        for (Enrollment e : enrollmentRepository.findByStudent(student.getStudentId())) {
+            if (e.getStatus() == EnrollmentStatus.COMPLETED) {
+                completed.add(e);
+            }
+        }
+
+        System.out.println("[TranscriptService] " + student.getFullName()
+                + " has " + completed.size() + " completed course(s).");
+        return completed;
     }
 
-    /**
-     * @param studentId 
-     * @return
-     */
-    public double calculateGPA(Long studentId) {
-        // TODO implement here
-        return 0.0d;
+    
+    public double calculateGPA(String studentId) {
+        Transcript transcript = generateTranscript(studentId);
+        double gpa = transcript.calculateGPA();
+        System.out.printf("[TranscriptService] GPA for student '%s': %.2f%n",
+                studentId, gpa);
+        return gpa;
     }
 
-    /**
-     * @param studentId 
-     * @return
-     */
-    public int getTotalCreditsEarned(Long studentId) {
-        // TODO implement here
-        return 0;
+    
+    public int getTotalCreditsEarned(String studentId) {
+        List<Enrollment> completed = getCompletedCourses(studentId);
+
+        int total = 0;
+        for (Enrollment e : completed) {
+            if (e.getCourse() != null) {
+                total += e.getCourse().getCredits();
+            }
+        }
+
+        System.out.println("[TranscriptService] Total credits earned: " + total);
+        return total;
     }
 
+    private Student requireStudent(String studentId) {
+        return studentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Student not found with studentId: " + studentId));
+    }
 }
