@@ -1,111 +1,102 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-import java.io.*;
-import java.util.*;
-
-/**
- * 
- */
 public class UserService {
 
-    /**
-     * Default constructor
-     */
-    public UserService() {
-    }
-
-    /**
-     * 
-     */
     private UserRepository userRepository;
 
-    /**
-     * 
-     */
-    private RoleRepository roleRepository;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-    /**
-     * @param id 
-     * @return
-     */
     public User getUserById(Long id) {
-        // TODO implement here
-        return null;
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    /**
-     * @param email 
-     * @return
-     */
     public User getUserByEmail(String email) {
-        // TODO implement here
-        return null;
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    /**
-     * @param userId 
-     * @param profileData 
-     * @return
-     */
-    public User updateProfile(Long userId, ProfileUpdateRequest profileData) {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param userId 
-     * @return
-     */
     public void blockUser(Long userId) {
-        // TODO implement here
-        return null;
+        User user = getUserById(userId);
+        user.setActive(false);
+        userRepository.save(user);
     }
 
-    /**
-     * @param userId 
-     * @return
-     */
     public void unblockUser(Long userId) {
-        // TODO implement here
-        return null;
+        User user = getUserById(userId);
+        user.setActive(true);
+        userRepository.save(user);
     }
 
-    /**
-     * @param userId 
-     * @return
-     */
     public void deleteUser(Long userId) {
-        // TODO implement here
-        return null;
+        userRepository.deleteById(userId);
     }
 
-    /**
-     * @param query 
-     * @param filters 
-     * @return
-     */
     public List<User> searchUsers(String query, SearchFilters filters) {
-        // TODO implement here
-        return null;
+        List<User> result = new ArrayList<>();
+        List<User> allUsers = userRepository.getUsers();
+
+        for (User user : allUsers) {
+            boolean matches = true;
+            if (query != null && !query.isEmpty()) {
+                String lower = query.toLowerCase();
+                if (!(user.getFullName().toLowerCase().contains(lower) ||
+                        user.getEmail().toLowerCase().contains(lower))) {
+                    matches = false;
+                }
+            }
+
+            if (filters != null) {
+                if (filters.isActiveOnly() && !user.isActive()) {
+                    matches = false;
+                }
+            }
+
+            if (matches) {
+                result.add(user);
+            }
+        }
+
+        return result;
     }
 
-    /**
-     * @param userId 
-     * @param role 
-     * @return
-     */
-    public void assignRole(Long userId, UserRole role) {
-        // TODO implement here
-        return null;
+    public User createUser(UserCreationRequest userData) {
+        if (userRepository.existsByEmail(userData.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User(
+                userData.getEmail(),
+                userData.getFirstName(),
+                userData.getLastName()
+        );
+        PasswordEncoder pe = new PasswordEncoder();
+
+        user.setPasswordHash(pe.encode(userData.getPassword()));
+
+        return userRepository.save(user);
     }
 
-    /**
-     * @param userId 
-     * @param role 
-     * @return
-     */
-    public void revokeRole(Long userId, UserRole role) {
-        // TODO implement here
-        return null;
-    }
+    public User updateUser(Long userId, UserUpdateRequest userData) {
+        User user = getUserById(userId);
 
+        if (userData.getFirstName() != null && userData.getLastName() != null) {
+            user.setFullName(userData.getFirstName(), userData.getLastName());
+        }
+
+        if (userData.getEmail() != null) {
+            user.setEmail(userData.getEmail());
+        }
+
+        if (userData.getPassword() != null) {
+        		PasswordEncoder pe = new PasswordEncoder();
+            user.setPasswordHash(pe.encode(userData.getPassword()));
+        }
+
+        return userRepository.save(user);
+    }
 }

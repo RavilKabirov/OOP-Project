@@ -24,6 +24,9 @@ public class main {
         
         System.out.println("\n========== Faculty Service Tests ============\n");
         runFacultyTests();
+        
+        System.out.println("\n========== User Service Tests ============\n");
+        runUserServiceTests();
 
         System.out.println("\n========== All Tests Complete ==========\n");
 
@@ -539,7 +542,75 @@ public class main {
             System.out.println("  Correctly rejected: " + ex.getMessage());
         }
     }
+    
+    
+    private static void runUserServiceTests() {
 
+        UserRepository userRepo = new UserRepository();
+        UserService userService = new UserService(userRepo);
+
+        System.out.println("--- TEST 1: Create users ---");
+
+        User u1 = userService.createUser(
+                new UserCreationRequest("alice@mail.com", "Alice", "Smith", "123")
+        );
+
+        User u2 = userService.createUser(
+                new UserCreationRequest("bob@mail.com", "Bob", "Jones", "456")
+        );
+
+        System.out.println("  u1: " + u1);
+        System.out.println("  u2: " + u2);
+
+        System.out.println("\n--- TEST 2: Get by ID ---");
+        System.out.println("  Found: " + userService.getUserById(u1.getId()));
+
+        System.out.println("\n--- TEST 3: Get by Email ---");
+        System.out.println("  Found: " + userService.getUserByEmail("bob@mail.com"));
+
+        System.out.println("\n--- TEST 4: Block / Unblock ---");
+        userService.blockUser(u1.getId());
+        System.out.println("  Alice active: " + userService.getUserById(u1.getId()).isActive());
+
+        userService.unblockUser(u1.getId());
+        System.out.println("  Alice active: " + userService.getUserById(u1.getId()).isActive());
+
+        System.out.println("\n--- TEST 5: Update user ---");
+        userService.updateUser(u2.getId(),
+                new UserUpdateRequest("newbob@mail.com", "Bobby", "Jones", "999"));
+
+        System.out.println("  Updated: " + userService.getUserById(u2.getId()));
+
+        System.out.println("\n--- TEST 6: Search users ---");
+        SearchFilters filters = new SearchFilters(true);
+        userService.blockUser(u2.getId()); // чтобы проверить фильтр
+
+        userService.searchUsers("alice", filters)
+                .forEach(u -> System.out.println("  " + u));
+
+        System.out.println("\n--- TEST 7: Delete user ---");
+        userService.deleteUser(u1.getId());
+
+        try {
+            userService.getUserById(u1.getId());
+            System.out.println("  ERROR: should have thrown!");
+        } catch (RuntimeException ex) {
+            System.out.println("  Correctly deleted: " + ex.getMessage());
+        }
+
+        System.out.println("\n--- TEST 8: Duplicate email guard ---");
+        try {
+            userService.createUser(
+                    new UserCreationRequest("newbob@mail.com", "Test", "User", "111")
+            );
+            System.out.println("  ERROR: should have thrown!");
+        } catch (RuntimeException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+    }
+    
+    
     private static int readInt(Scanner scanner) {
         while (!scanner.hasNextInt()) {
             System.out.print("Type a number: ");
