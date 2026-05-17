@@ -1,104 +1,120 @@
-
-import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class FacultyService {
 
-    /**
-     * Default constructor
-     */
-    public FacultyService() {
+    private final FacultyRepository    facultyRepository;
+    private final DepartmentRepository departmentRepository;
+    private final TeacherRepository    teacherRepository;
+
+    public FacultyService(FacultyRepository facultyRepository,
+                          DepartmentRepository departmentRepository,
+                          TeacherRepository teacherRepository) {
+        this.facultyRepository    = facultyRepository;
+        this.departmentRepository = departmentRepository;
+        this.teacherRepository    = teacherRepository;
     }
 
-    /**
-     * 
-     */
-    private FacultyRepository facultyRepository;
+    public School createFaculty(FacultyCreationRequest data) {
+        facultyRepository.findByName(data.getName()).ifPresent(existing -> {
+            throw new IllegalArgumentException(
+                    "A school named '" + data.getName() + "' already exists "
+                    + "(id=" + existing.getId() + ").");
+        });
 
-    /**
-     * 
-     */
-    private DepartmentRepository departmentRepository;
+        School school = new School();
+        school.setName(data.getName());
+        facultyRepository.save(school);
 
-    /**
-     * 
-     */
-    private TeacherRepository teacherRepository;
-
-    /**
-     * @param data 
-     * @return
-     */
-    public Faculty createFaculty(FacultyCreationRequest data) {
-        // TODO implement here
-        return null;
+        System.out.println("[FacultyService] Created school '" + school.getName()
+                + "' (id=" + school.getId() + ")");
+        return school;
     }
 
-    /**
-     * @param facultyId 
-     * @param data 
-     * @return
-     */
-    public Faculty updateFaculty(Long facultyId, FacultyUpdateRequest data) {
-        // TODO implement here
-        return null;
+    public School updateFaculty(Long facultyId, FacultyUpdateRequest data) {
+        School school = requireSchool(facultyId);
+
+        if (data.getName() != null && !data.getName().isBlank()) {
+            school.setName(data.getName());
+        }
+
+        facultyRepository.save(school);
+        System.out.println("[FacultyService] Updated school id=" + facultyId
+                + " → name='" + school.getName() + "'");
+        return school;
     }
 
-    /**
-     * @param facultyId 
-     * @return
-     */
     public void deleteFaculty(Long facultyId) {
-        // TODO implement here
-        return null;
+        requireSchool(facultyId);
+
+        List<Department> deps = facultyRepository.findDepartmentsBySchoolId(facultyId);
+        for (Department d : deps) {
+            departmentRepository.deleteById(d.getId());
+        }
+
+        facultyRepository.deleteById(facultyId);
+        System.out.println("[FacultyService] Deleted school id=" + facultyId
+                + " and " + deps.size() + " linked department(s).");
     }
 
-    /**
-     * @param facultyId 
-     * @return
-     */
-    public Optional<Faculty> getFacultyById(Long facultyId) {
-        // TODO implement here
-        return null;
+    public Optional<School> getFacultyById(Long facultyId) {
+        return facultyRepository.findById(facultyId);
     }
 
-    /**
-     * @return
-     */
-    public List<Faculty> getAllFaculties() {
-        // TODO implement here
-        return null;
+    public List<School> getAllFaculties() {
+        return facultyRepository.findAll();
     }
 
-    /**
-     * @param facultyId 
-     * @param teacherId 
-     * @return
-     */
     public void assignDean(Long facultyId, Long teacherId) {
-        // TODO implement here
-        return null;
+        School school = requireSchool(facultyId);
+
+        Teacher teacher = teacherRepository.findAll().stream()
+                .filter(t -> t.getId() != null && t.getId().equals(teacherId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Teacher not found with id: " + teacherId));
+
+        Dean dean = new Dean(teacher.getEmail(),
+                             teacher.getFirstName(),
+                             teacher.getLastName());
+        dean.setId(teacher.getId());
+        dean.setEmployeeId(teacher.getEmployeeId());
+        dean.setSchool(school);
+
+        school.setDean(dean);
+        facultyRepository.save(school);
+
+        System.out.println("[FacultyService] Assigned " + dean.getFullName()
+                + " as Dean of '" + school.getName() + "'");
     }
 
-    /**
-     * @param facultyId 
-     * @return
-     */
+
     public List<Department> getFacultyDepartments(Long facultyId) {
-        // TODO implement here
-        return null;
+        requireSchool(facultyId);
+        return facultyRepository.findDepartmentsBySchoolId(facultyId);
     }
 
-    /**
-     * @param nameKeyword 
-     * @return
-     */
-    public List<Faculty> searchFaculties(String nameKeyword) {
-        // TODO implement here
-        return null;
+    public List<School> searchFaculties(String nameKeyword) {
+        if (nameKeyword == null || nameKeyword.isBlank()) {
+            return facultyRepository.findAll();
+        }
+        return facultyRepository.searchByName(nameKeyword);
     }
 
+
+    public Department addDepartmentToFaculty(Long facultyId, Department department) {
+        requireSchool(facultyId);
+
+        departmentRepository.save(department);
+        facultyRepository.addDepartment(facultyId, department);
+
+        System.out.println("[FacultyService] Added department '" + department.getName()
+                + "' to school id=" + facultyId);
+        return department;
+    }
+
+    private School requireSchool(Long facultyId) {
+        return facultyRepository.findById(facultyId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "School (Faculty) not found with id: " + facultyId));
+    }
 }

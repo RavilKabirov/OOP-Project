@@ -1,16 +1,18 @@
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
  * 
  */
 public abstract class Manager extends Employee {
-    private ManagerLevel level;
+    private ManagerLevel level = ManagerLevel.DEPARTMENT;
     private LocalDateTime appointedAt;
     
     
-    public Manager() {
+    public Manager(String email, String firstName, String lastName) {
+    	super(email, firstName, lastName);
     }
 
     /**

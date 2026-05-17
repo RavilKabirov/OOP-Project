@@ -21,6 +21,9 @@ public class main {
 
         System.out.println("\n========== Transcript Service Tests ==========\n");
         runTranscriptTests();
+        
+        System.out.println("\n========== Faculty Service Tests ============\n");
+        runFacultyTests();
 
         System.out.println("\n========== All Tests Complete ==========\n");
 
@@ -408,6 +411,134 @@ public class main {
                 + " (expect 0)");
     }
 
+    private static void runFacultyTests() {
+
+        // ── Setup ─────────────────────────────────────────────────────────────
+        FacultyRepository    facultyRepo  = new FacultyRepository();
+        DepartmentRepository deptRepo     = new DepartmentRepository();
+        TeacherRepository    teacherRepo  = new TeacherRepository();
+        FacultyService       facultyService =
+                new FacultyService(facultyRepo, deptRepo, teacherRepo);
+
+        // ── TEST 1: createFaculty ─────────────────────────────────────────────
+        System.out.println("--- TEST 1: createFaculty ---");
+        School engineering = facultyService.createFaculty(
+                new FacultyCreationRequest("School of Engineering"));
+        School science = facultyService.createFaculty(
+                new FacultyCreationRequest("School of Science"));
+        School arts = facultyService.createFaculty(
+                new FacultyCreationRequest("School of Arts"));
+        System.out.println("  Created: " + engineering.getName() + " (id=" + engineering.getId() + ")");
+        System.out.println("  Created: " + science.getName()     + " (id=" + science.getId()     + ")");
+        System.out.println("  Created: " + arts.getName()        + " (id=" + arts.getId()        + ")");
+
+        // ── TEST 2: getAllFaculties ────────────────────────────────────────────
+        System.out.println("\n--- TEST 2: getAllFaculties ---");
+        List<School> all = facultyService.getAllFaculties();
+        System.out.println("  Total schools: " + all.size() + " (expect 3)");
+        all.forEach(s -> System.out.println("  - " + s.getName()));
+
+        // ── TEST 3: getFacultyById ────────────────────────────────────────────
+        System.out.println("\n--- TEST 3: getFacultyById ---");
+        facultyService.getFacultyById(engineering.getId())
+                .ifPresent(s -> System.out.println("  Found: " + s.getName()));
+        System.out.println("  Missing id returns empty: "
+                + facultyService.getFacultyById(999L).isEmpty() + " (expect true)");
+
+        // ── TEST 4: updateFaculty ─────────────────────────────────────────────
+        System.out.println("\n--- TEST 4: updateFaculty ---");
+        School updated = facultyService.updateFaculty(
+                arts.getId(), new FacultyUpdateRequest("School of Arts & Humanities"));
+        System.out.println("  Updated name: " + updated.getName()
+                + " (expect 'School of Arts & Humanities')");
+
+        // ── TEST 5: searchFaculties ───────────────────────────────────────────
+        System.out.println("\n--- TEST 5: searchFaculties ---");
+        List<School> hits = facultyService.searchFaculties("science");
+        System.out.println("  Search 'science' hits: " + hits.size() + " (expect 1)");
+        hits.forEach(s -> System.out.println("  - " + s.getName()));
+
+        List<School> allHits = facultyService.searchFaculties("school");
+        System.out.println("  Search 'school' hits: " + allHits.size() + " (expect 3)");
+
+        // ── TEST 6: addDepartmentToFaculty ────────────────────────────────────
+        System.out.println("\n--- TEST 6: addDepartmentToFaculty ---");
+        Department cs = new Department();
+        cs.setName("Computer Science");
+        cs.setCode("CS");
+        facultyService.addDepartmentToFaculty(engineering.getId(), cs);
+
+        Department ee = new Department();
+        ee.setName("Electrical Engineering");
+        ee.setCode("EE");
+        facultyService.addDepartmentToFaculty(engineering.getId(), ee);
+
+        Department math = new Department();
+        math.setName("Mathematics");
+        math.setCode("MATH");
+        facultyService.addDepartmentToFaculty(science.getId(), math);
+
+        System.out.println("  Engineering departments saved.");
+
+        // ── TEST 7: getFacultyDepartments ─────────────────────────────────────
+        System.out.println("\n--- TEST 7: getFacultyDepartments ---");
+        List<Department> engDepts = facultyService.getFacultyDepartments(engineering.getId());
+        System.out.println("  Engineering dept count: " + engDepts.size() + " (expect 2)");
+        engDepts.forEach(d -> System.out.println("  - [" + d.getCode() + "] " + d.getName()));
+
+        List<Department> sciDepts = facultyService.getFacultyDepartments(science.getId());
+        System.out.println("  Science dept count: " + sciDepts.size() + " (expect 1)");
+
+        // ── TEST 8: assignDean ────────────────────────────────────────────────
+        System.out.println("\n--- TEST 8: assignDean ---");
+        Teacher prof = new Teacher("prof.dean@uni.edu", "Eleanor", "Vance") {};
+        prof.setId(10L);
+        prof.setEmployeeId("T010");
+        teacherRepo.save(prof);
+
+        facultyService.assignDean(engineering.getId(), 10L);
+        School afterAssign = facultyService.getFacultyById(engineering.getId()).get();
+        System.out.println("  Dean of Engineering: "
+                + afterAssign.getDean().getFullName() + " (expect 'Eleanor Vance')");
+
+        // ── TEST 9: assignDean — teacher not found guard ──────────────────────
+        System.out.println("\n--- TEST 9: assignDean with unknown teacher ---");
+        try {
+            facultyService.assignDean(engineering.getId(), 999L);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 10: createFaculty — duplicate name guard ─────────────────────
+        System.out.println("\n--- TEST 10: createFaculty duplicate name guard ---");
+        try {
+            facultyService.createFaculty(new FacultyCreationRequest("School of Engineering"));
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 11: deleteFaculty ────────────────────────────────────────────
+        System.out.println("\n--- TEST 11: deleteFaculty ---");
+        facultyService.deleteFaculty(arts.getId());
+        System.out.println("  Schools after delete: "
+                + facultyService.getAllFaculties().size() + " (expect 2)");
+        System.out.println("  Arts gone: "
+                + facultyService.getFacultyById(arts.getId()).isEmpty() + " (expect true)");
+
+        // ── TEST 12: deleteFaculty also removes departments ───────────────────
+        System.out.println("\n--- TEST 12: deleteFaculty removes linked departments ---");
+        facultyService.deleteFaculty(engineering.getId());
+        System.out.println("  Schools remaining: "
+                + facultyService.getAllFaculties().size() + " (expect 1)");
+        try {
+            facultyService.getFacultyDepartments(engineering.getId());
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+    }
 
     private static int readInt(Scanner scanner) {
         while (!scanner.hasNextInt()) {

@@ -21,7 +21,7 @@ public class MessageRepository {
     /**
      * 
      */
-    private List<Messages> sentMessages;
+    private List<Message> sentMessages;
 
 
 
@@ -43,7 +43,7 @@ public class MessageRepository {
     /**
      * @return
      */
-    public List<Messages> getSentMessages() {
+    public List<Message> getSentMessages() {
         // TODO implement here
         return null;
     }

@@ -8,10 +8,12 @@ import java.util.*;
 public class Dean extends Manager {
     private School school;
     
-    public Dean() {
-    }
 
-    /**
+    public Dean(String email, String firstName, String lastName) {
+		super(email, firstName, lastName);
+	}
+
+	/**
      * @return
      */
     public School getSchool() {

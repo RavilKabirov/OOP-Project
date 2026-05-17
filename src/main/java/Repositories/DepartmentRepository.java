@@ -1,74 +1,57 @@
-
-import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
+
 public class DepartmentRepository {
 
-    /**
-     * Default constructor
-     */
+    private final List<Department> departments;
+    private long nextId = 1;
+
     public DepartmentRepository() {
+        this.departments = new ArrayList<>();
     }
 
-    /**
-     * 
-     */
-    private List<Department> departments;
-
-    /**
-     * @param department 
-     * @return
-     */
     public Department save(Department department) {
-        // TODO implement here
-        return null;
+        if (department.getId() == null) {
+            department.setId(nextId++);
+            departments.add(department);
+        } else {
+            for (int i = 0; i < departments.size(); i++) {
+                if (departments.get(i).getId().equals(department.getId())) {
+                    departments.set(i, department);
+                    return department;
+                }
+            }
+            departments.add(department);
+        }
+        return department;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public Optional<Department> findById(Long id) {
-        // TODO implement here
-        return null;
+        return departments.stream()
+                .filter(d -> d.getId() != null && d.getId().equals(id))
+                .findFirst();
     }
 
-    /**
-     * @param code 
-     * @return
-     */
     public Optional<Department> findByCode(String code) {
-        // TODO implement here
-        return null;
+        return departments.stream()
+                .filter(d -> d.getCode() != null
+                          && d.getCode().equalsIgnoreCase(code))
+                .findFirst();
     }
 
-    /**
-     * @param hId 
-     * @return
-     */
+
     public Optional<Department> findByHead(String hId) {
-        // TODO implement here
-        return null;
+        return departments.stream()
+                .filter(d -> d.getHead() != null
+                          && hId.equals(d.getHead().getEmployeeId()))
+                .findFirst();
     }
 
-    /**
-     * @return
-     */
     public List<Department> findAll() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>(departments);
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+        departments.removeIf(d -> d.getId() != null && d.getId().equals(id));
     }
-
 }
