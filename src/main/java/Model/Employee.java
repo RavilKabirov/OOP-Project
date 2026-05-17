@@ -7,7 +7,6 @@ import java.util.*;
 public abstract class Employee extends User {
     private String employeeId;
     private Department department;
-    private MessageRepository messages;
     
     public Employee(String email, String firstName, String lastName) {
         super(email, firstName, lastName);
@@ -41,20 +40,6 @@ public abstract class Employee extends User {
         this.department=value;
     }
 
-    /**
-     * @return
-     */
-    public List<Message> getSentMessages() {
-        // TODO implement here
-        return messages.getSentMessages();
-    }
-
-    /**
-     * @return
-     */
-    public List<Message> getInboxMessages() {
-        // TODO implement here
-        return messages.getInboxMessages();
-    }
+    
 
 }

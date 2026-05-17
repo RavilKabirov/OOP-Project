@@ -31,6 +31,9 @@ public class main {
         System.out.println("\n========== Teacher Service Tests ============\n");
         runTeacherTests();
         
+        System.out.println("\n========== Complaint Service Tests ============\n");
+        runComplaintTests();
+        
         System.out.println("\n========== All Tests Complete ==========\n");
 
         Scanner scanner = new Scanner(System.in);
@@ -752,6 +755,172 @@ public class main {
         }
 
         System.out.println("\n=== All TeacherService tests completed ===");
+    }
+    
+    private static void runComplaintTests() {
+    	 
+        // ── Setup ─────────────────────────────────────────────────────────────
+        ComplaintRepository complaintRepo = new ComplaintRepository();
+        TeacherRepository   teacherRepo   = new TeacherRepository();
+        StudentRepository   studentRepo   = new StudentRepository();
+        ComplaintService    complaintService =
+                new ComplaintService(complaintRepo, teacherRepo, studentRepo);
+ 
+        // ── Teacher ───────────────────────────────────────────────────────────
+        Teacher prof = new Teacher("asd@asd.dsa", "ASD", "DSA") {};
+        prof.setId(1L);
+        prof.setEmployeeId("T001");
+        
+        teacherRepo.save(prof);
+ 
+        Teacher prof2 = new Teacher("ffhdjd@ds.ds", "EW", "WE") {};
+        prof2.setId(2L);
+        prof2.setEmployeeId("T002");
+        teacherRepo.save(prof2);
+ 
+        // ── Students ──────────────────────────────────────────────────────────
+        Student alice = new Student() {};
+        alice.setId(10L);
+        alice.setStudentId("S001");
+        alice.setFullName("Alice", "Smith");
+        studentRepo.save(alice);
+ 
+        Student bob = new Student() {};
+        bob.setId(11L);
+        bob.setStudentId("S002");
+        bob.setFullName("Bob", "Jones");
+        studentRepo.save(bob);
+ 
+        // ── TEST 1: submitComplaint ───────────────────────────────────────────
+        System.out.println("--- TEST 1: submitComplaint ---");
+        Complaint c1 = complaintService.submitComplaint(
+                1L, "S001", ManagerForComplaint.DEAN, UrgencyLevel.HIGH);
+        Complaint c2 = complaintService.submitComplaint(
+                1L, "S002", ManagerForComplaint.DEPARTMENT_HEAD, UrgencyLevel.LOW);
+        Complaint c3 = complaintService.submitComplaint(
+                2L, "S001", ManagerForComplaint.DEAN, UrgencyLevel.MEDIUM);
+        System.out.println("  c1: " + c1 + " status=" + c1.getComplaintStatus());
+        System.out.println("  c2: " + c2 + " status=" + c2.getComplaintStatus());
+        System.out.println("  c3: " + c3 + " status=" + c3.getComplaintStatus());
+ 
+        // ── TEST 2: getAllComplaints ───────────────────────────────────────────
+        System.out.println("\n--- TEST 2: getAllComplaints ---");
+        System.out.println("  Total: " + complaintService.getAllComplaints().size()
+                + " (expect 3)");
+ 
+        // ── TEST 3: getComplaintsByTeacher ────────────────────────────────────
+        System.out.println("\n--- TEST 3: getComplaintsByTeacher ---");
+        List<Complaint> byTuring = complaintService.getComplaintsByTeacher(1L);
+        System.out.println("  Turing's complaints: " + byTuring.size() + " (expect 2)");
+        List<Complaint> byAda = complaintService.getComplaintsByTeacher(2L);
+        System.out.println("  Lovelace's complaints: " + byAda.size() + " (expect 1)");
+ 
+        // ── TEST 4: getComplaintsByStudent ────────────────────────────────────
+        System.out.println("\n--- TEST 4: getComplaintsByStudent ---");
+        List<Complaint> aboutAlice = complaintService.getComplaintsByStudent("S001");
+        System.out.println("  About Alice: " + aboutAlice.size() + " (expect 2)");
+        List<Complaint> aboutBob = complaintService.getComplaintsByStudent("S002");
+        System.out.println("  About Bob: " + aboutBob.size() + " (expect 1)");
+ 
+        // ── TEST 5: getComplaintsByRecipient ──────────────────────────────────
+        System.out.println("\n--- TEST 5: getComplaintsByRecipient ---");
+        List<Complaint> toDean = complaintService.getComplaintsByRecipient(
+                ManagerForComplaint.DEAN);
+        System.out.println("  To DEAN: " + toDean.size() + " (expect 2)");
+        List<Complaint> toHead = complaintService.getComplaintsByRecipient(
+                ManagerForComplaint.DEPARTMENT_HEAD);
+        System.out.println("  To DEPARTMENT_HEAD: " + toHead.size() + " (expect 1)");
+ 
+        // ── TEST 6: getComplaintsByUrgency ────────────────────────────────────
+        System.out.println("\n--- TEST 6: getComplaintsByUrgency ---");
+        System.out.println("  HIGH: " + complaintService.getComplaintsByUrgency(
+                UrgencyLevel.HIGH).size() + " (expect 1)");
+        System.out.println("  MEDIUM: " + complaintService.getComplaintsByUrgency(
+                UrgencyLevel.MEDIUM).size() + " (expect 1)");
+        System.out.println("  LOW: " + complaintService.getComplaintsByUrgency(
+                UrgencyLevel.LOW).size() + " (expect 1)");
+ 
+        // ── TEST 7: reviewComplaint ───────────────────────────────────────────
+        System.out.println("\n--- TEST 7: reviewComplaint ---");
+        complaintService.reviewComplaint(c1.getId());
+        System.out.println("  c1 status: " + c1.getComplaintStatus()
+                + " (expect UNDER_REVIEW)");
+        System.out.println("  UNDER_REVIEW count: " + complaintService
+                .getComplaintsByStatus(ComplaintStatus.UNDER_REVIEW).size()
+                + " (expect 1)");
+ 
+        // ── TEST 8: resolveComplaint ──────────────────────────────────────────
+        System.out.println("\n--- TEST 8: resolveComplaint ---");
+        complaintService.resolveComplaint(c1.getId());
+        System.out.println("  c1 resolved: " + c1.isResolved() + " (expect true)");
+        System.out.println("  RESOLVED count: " + complaintService
+                .getComplaintsByStatus(ComplaintStatus.RESOLVED).size()
+                + " (expect 1)");
+ 
+        // ── TEST 9: rejectComplaint ───────────────────────────────────────────
+        System.out.println("\n--- TEST 9: rejectComplaint ---");
+        complaintService.rejectComplaint(c2.getId());
+        System.out.println("  c2 status: " + c2.getComplaintStatus()
+                + " (expect REJECTED)");
+ 
+        // ── TEST 10: lifecycle guard — resolve without review ─────────────────
+        System.out.println("\n--- TEST 10: resolve without review guard ---");
+        try {
+            complaintService.resolveComplaint(c3.getId()); // still SUBMITTED
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+ 
+        // ── TEST 11: lifecycle guard — reject already resolved ────────────────
+        System.out.println("\n--- TEST 11: reject already resolved guard ---");
+        try {
+            complaintService.rejectComplaint(c1.getId()); // already RESOLVED
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+ 
+        // ── TEST 12: deleteComplaint — active complaint guard ─────────────────
+        System.out.println("\n--- TEST 12: deleteComplaint on active complaint guard ---");
+        try {
+            complaintService.deleteComplaint(c3.getId()); // still SUBMITTED
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+ 
+        // ── TEST 13: deleteComplaint — success on resolved ────────────────────
+        System.out.println("\n--- TEST 13: deleteComplaint resolved complaint ---");
+        complaintService.deleteComplaint(c1.getId());
+        System.out.println("  Total after delete: " + complaintService
+                .getAllComplaints().size() + " (expect 2)");
+        try {
+            complaintService.getComplaintById(c1.getId());
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly not found: " + ex.getMessage());
+        }
+ 
+        // ── TEST 14: submit with unknown teacher guard ─────────────────────────
+        System.out.println("\n--- TEST 14: submit with unknown teacher ---");
+        try {
+            complaintService.submitComplaint(
+                    999L, "S001", ManagerForComplaint.DEAN, UrgencyLevel.LOW);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+ 
+        // ── TEST 15: submit with unknown student guard ─────────────────────────
+        System.out.println("\n--- TEST 15: submit with unknown student ---");
+        try {
+            complaintService.submitComplaint(
+                    1L, "S999", ManagerForComplaint.DEAN, UrgencyLevel.LOW);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
     }
     
     

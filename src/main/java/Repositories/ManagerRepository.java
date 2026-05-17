@@ -39,7 +39,7 @@ public class ManagerRepository {
     }
 
     public void deleteById(Long id) {
-        managers.removeIf(m -> m.getEmployeeId().equals(employeeId));
+        managers.removeIf(m -> m.getEmployeeId().equals(id));
     }
 
 }

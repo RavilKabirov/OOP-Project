@@ -1,92 +1,96 @@
-
-import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
+
 public class ComplaintRepository {
 
-    /**
-     * Default constructor
-     */
-    public ComplaintRepository() {
-    }
-
-    /**
-     * 
-     */
     public List<Complaint> complaints;
+    private long nextId = 1;
 
-    /**
-     * @param complaint 
-     * @return
-     */
+    public ComplaintRepository() {
+        this.complaints = new ArrayList<>();
+    }
+
     public Complaint save(Complaint complaint) {
-        // TODO implement here
-        return null;
+        if (complaint.getId() == null) {
+            complaint.setId(nextId++);
+            complaints.add(complaint);
+        } else {
+            for (int i = 0; i < complaints.size(); i++) {
+                if (complaints.get(i).getId().equals(complaint.getId())) {
+                    complaints.set(i, complaint);
+                    return complaint;
+                }
+            }
+            complaints.add(complaint); 
+        }
+        return complaint;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public Optional<Complaint> findById(Long id) {
-        // TODO implement here
-        return null;
+        return complaints.stream()
+                .filter(c -> c.getId() != null && c.getId().equals(id))
+                .findFirst();
     }
 
-    /**
-     * @param teacherId 
-     * @return
-     */
+
     public List<Complaint> findBySender(Long teacherId) {
-        // TODO implement here
-        return null;
+        List<Complaint> result = new ArrayList<>();
+        for (Complaint c : complaints) {
+            if (c.getSender() != null
+                    && c.getSender().getId() != null
+                    && c.getSender().getId().equals(teacherId)) {
+                result.add(c);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param managerId 
-     * @return
-     */
-    public List<Complaint> findByRecipient(Long managerId) {
-        // TODO implement here
-        return null;
+    public List<Complaint> findByRecipient(ManagerForComplaint role) {
+        List<Complaint> result = new ArrayList<>();
+        for (Complaint c : complaints) {
+            if (role.equals(c.getRecipient())) {
+                result.add(c);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param studentID 
-     * @return
-     */
-    public List<Complaint> findByTargetStudent(Long studentID) {
-        // TODO implement here
-        return null;
+    public List<Complaint> findByTargetStudentId(String studentId) {
+        List<Complaint> result = new ArrayList<>();
+        for (Complaint c : complaints) {
+            if (c.getTargetStudent() != null
+                    && studentId.equals(c.getTargetStudent().getStudentId())) {
+                result.add(c);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @param status 
-     * @return
-     */
     public List<Complaint> findByStatus(ComplaintStatus status) {
-        // TODO implement here
-        return null;
+        List<Complaint> result = new ArrayList<>();
+        for (Complaint c : complaints) {
+            if (status.equals(c.getComplaintStatus())) {
+                result.add(c);
+            }
+        }
+        return result;
     }
 
-    /**
-     * @return
-     */
+    public List<Complaint> findByUrgency(UrgencyLevel level) {
+        List<Complaint> result = new ArrayList<>();
+        for (Complaint c : complaints) {
+            if (level.equals(c.getUrgencyLevel())) {
+                result.add(c);
+            }
+        }
+        return result;
+    }
+
     public List<Complaint> findAll() {
-        // TODO implement here
-        return null;
+        return new ArrayList<>(complaints);
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+        complaints.removeIf(c -> c.getId() != null && c.getId().equals(id));
     }
-
 }
