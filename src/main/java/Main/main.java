@@ -25,6 +25,9 @@ public class main {
         System.out.println("\n========== Faculty Service Tests ============\n");
         runFacultyTests();
         
+        System.out.println("\n========== Course Service Tests ============\n");
+        runCourseTests();
+        
         System.out.println("\n========== User Service Tests ============\n");
         runUserServiceTests();
         
@@ -921,6 +924,115 @@ public class main {
         } catch (IllegalArgumentException ex) {
             System.out.println("  Correctly rejected: " + ex.getMessage());
         }
+    }
+    
+    private static void runCourseTests() {
+
+        CourseRepository     courseRepo  = new CourseRepository();
+        DepartmentRepository deptRepo    = new DepartmentRepository();
+        TeacherRepository    teacherRepo = new TeacherRepository();
+        CourseService        courseService =
+                new CourseService(courseRepo, deptRepo, teacherRepo);
+
+        // --- TEST 1: Create course ---
+        System.out.println("--- TEST 1: createCourse ---");
+        Course math = courseService.createCourse(
+                new CourseCreationRequest("MATH101", "Calculus I", 4, CourseType.MAJOR)
+        );
+        Course cs = courseService.createCourse(
+                new CourseCreationRequest("CS101", "OOP and Design", 5, CourseType.MAJOR)
+        );
+        Course elective = courseService.createCourse(
+                new CourseCreationRequest("ART101", "Art History", 2, CourseType.FREE_ELECTIVE)
+        );
+        System.out.println("  Created: " + math.getName());
+        System.out.println("  Created: " + cs.getName());
+        System.out.println("  Created: " + elective.getName());
+
+        // --- TEST 2: Duplicate guard ---
+        System.out.println("\n--- TEST 2: Duplicate courseId guard ---");
+        try {
+            courseService.createCourse(
+                    new CourseCreationRequest("MATH101", "Calculus II", 4, CourseType.MAJOR)
+            );
+            System.out.println("  ERROR: should have thrown!");
+        } catch (RuntimeException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // --- TEST 3: getCourseById ---
+        System.out.println("\n--- TEST 3: getCourseById ---");
+        Course found = courseService.getCourseById(1L);
+        System.out.println("  Found: " + found.getName() + " (expect 'Calculus I')");
+
+        // --- TEST 4: updateCourse ---
+        System.out.println("\n--- TEST 4: updateCourse ---");
+        courseService.updateCourse(1L,
+                new CourseUpdateRequest("Calculus I Advanced", null, null)
+        );
+        System.out.println("  Updated: " + courseService.getCourseById(1L).getName()
+                + " (expect 'Calculus I Advanced')");
+
+        // --- TEST 5: searchCourses by type ---
+        System.out.println("\n--- TEST 5: searchCourses by type MAJOR ---");
+        List<Course> majors = courseService.searchCourses(
+                new CourseSearchFilters(CourseType.MAJOR, null, null)
+        );
+        System.out.println("  MAJOR count: " + majors.size() + " (expect 2)");
+
+        // --- TEST 6: searchCourses by keyword ---
+        System.out.println("\n--- TEST 6: searchCourses by keyword ---");
+        List<Course> hits = courseService.searchCourses(
+                new CourseSearchFilters(null, "calculus", null)
+        );
+        System.out.println("  Keyword 'calculus' hits: " + hits.size() + " (expect 1)");
+
+        // --- TEST 7: searchCourses by maxCredits ---
+        System.out.println("\n--- TEST 7: searchCourses by maxCredits ---");
+        List<Course> cheap = courseService.searchCourses(
+                new CourseSearchFilters(null, null, 3)
+        );
+        System.out.println("  Max 3 credits count: " + cheap.size() + " (expect 1)");
+
+        // --- TEST 8: assignInstructor ---
+        System.out.println("\n--- TEST 8: assignInstructor ---");
+        Teacher prof = new Teacher("prof@uni.edu", "John", "Doe") {};
+        prof.setEmployeeId("1");
+        teacherRepo.save(prof);
+        courseService.assignInstructor(1L, 1L);
+        System.out.println("  Teachers on course: "
+                + courseService.getCourseById(1L).getTeachers().size() + " (expect 1)");
+
+        // --- TEST 9: assignInstructor duplicate guard ---
+        System.out.println("\n--- TEST 9: assignInstructor duplicate guard ---");
+        try {
+            courseService.assignInstructor(1L, 1L);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (RuntimeException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // --- TEST 10: deleteCourse without enrollments ---
+        System.out.println("\n--- TEST 10: deleteCourse (no enrollments) ---");
+        courseService.deleteCourse(3L); // elective
+        List<Course> remaining = courseService.searchCourses(null);
+        System.out.println("  Courses remaining: " + remaining.size() + " (expect 2)");
+
+        // --- TEST 11: deleteCourse with enrollments guard ---
+        System.out.println("\n--- TEST 11: deleteCourse with enrollments guard ---");
+        Enrollment fakeEnrollment = new Enrollment();
+        courseService.getCourseById(1L).addEnrollment(fakeEnrollment);
+        try {
+            courseService.deleteCourse(1L);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (RuntimeException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // --- TEST 12: getCoursesByDepartment ---
+        System.out.println("\n--- TEST 12: getCoursesByDepartment ---");
+        List<Course> deptCourses = courseService.getCoursesByDepartment(1L);
+        System.out.println("  Dept courses: " + deptCourses.size() + " (expect 1)");
     }
     
     
