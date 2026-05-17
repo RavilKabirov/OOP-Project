@@ -1,46 +1,52 @@
-
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
 public class NewsRepository {
-
-    /**
-     * Default constructor
-     */
-    public NewsRepository() {
-    }
-
-    /**
-     * 
-     */
     public List<News> newsList;
+    private long nextId = 1;
+    
+    public NewsRepository() {
+    	this.newsList = new ArrayList();
+    }
 
-    /**
-     * @param news 
-     * @return
-     */
     public News save(News news) {
-        // TODO implement here
-        return null;
+        if (news.getId() == null) {
+        	news.setId(nextId++);
+        	newsList.add(news);
+        } else {
+        	for (int i=0; i < newsList.size(); i++) {
+        		if (newsList.get(i).getId().equals(news.getId())) {
+        			newsList.set(i, news);
+        			return news;
+        		}
+        	}
+        	newsList.add(news);
+        }
+        return news;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
     public Optional<News> findById(Long id) {
-        // TODO implement here
-        return null;
+        return newsList.stream()
+        		.filter(n -> n.getId().equals(id))
+        		.findFirst();
+    }
+    
+    public List<News> findAll(){
+    	return new ArrayList<>(newsList);
     }
 
-    /**
-     * 
-     */
-    public void Operation1() {
-        // TODO implement here
+    public List<News> findByAuthorId(Long authorId){
+    	List<News> result = new ArrayList();
+    	for (News n : newsList) {
+    		if (n.getAuthorId() != null && n.getAuthorId().equals(authorId)) {
+    			result.add(n);
+    		}
+    	}
+    	return result;
+    }
+    
+    public void deleteById(Long id) {
+        newsList.removeIf(n -> n.getId().equals(id));
     }
 
 }
