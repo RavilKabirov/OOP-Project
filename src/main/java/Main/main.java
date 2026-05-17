@@ -39,7 +39,11 @@ public class main {
         
         System.out.println("\n========== Message Service Tests ============\n");
         runMessageTests();
+        
+        System.out.println("\n========== News Service Tests ============\n");
+        runNewsTests();
         System.out.println("\n========== All Tests Complete ==========\n");
+        
 
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -1193,6 +1197,86 @@ public class main {
         List<Message> bobConvo = messageService.getConversation(2L, 1L);
         System.out.println("  Bob's convo size (still sees m5): "
                 + bobConvo.size() + " (expect 3)");
+    }
+    
+    private static void runNewsTests() {
+
+        UserRepository userRepo = new UserRepository();
+        NewsRepository newsRepo = new NewsRepository();
+        NewsService    newsService = new NewsService(newsRepo, userRepo);
+
+        // Создаём пользователей
+        User author = new User("author@uni.edu", "Aibek", "Seitkali");
+        userRepo.save(author);
+        User editor = new User("editor@uni.edu", "Dana", "Bekova");
+        userRepo.save(editor);
+
+        // --- TEST 1: publishNews ---
+        System.out.println("--- TEST 1: publishNews ---");
+        News n1 = newsService.publishNews(author.getId(), "AI Conference", "Details here...");
+        News n2 = newsService.publishNews(author.getId(), "Research Week", "Join us...");
+        News n3 = newsService.publishNews(editor.getId(), "Campus News", "Today at campus...");
+        System.out.println("  Published: " + n1);
+        System.out.println("  Published: " + n2);
+        System.out.println("  Published: " + n3);
+
+        // --- TEST 2: getLatestNews ---
+        System.out.println("\n--- TEST 2: getLatestNews(2) ---");
+        newsService.getLatestNews(2)
+                   .forEach(n -> System.out.println("  " + n));
+
+        // --- TEST 3: getNewsById ---
+        System.out.println("\n--- TEST 3: getNewsById ---");
+        newsService.getNewsById(n1.getId())
+                   .ifPresent(n -> System.out.println("  Found: " + n.getTitle()));
+
+        // --- TEST 4: editNews ---
+        System.out.println("\n--- TEST 4: editNews ---");
+        newsService.editNews(n1.getId(), editor.getId(), "Updated content about AI.");
+        System.out.println("  Edited: " + newsService.getNewsById(n1.getId()).get().getContent());
+
+        // --- TEST 5: searchNews by keyword ---
+        System.out.println("\n--- TEST 5: searchNews keyword 'research' ---");
+        newsService.searchNews("research", null, null)
+                   .forEach(n -> System.out.println("  " + n.getTitle()));
+
+        // --- TEST 6: getNewsByAuthor ---
+        System.out.println("\n--- TEST 6: getNewsByAuthor ---");
+        newsService.getNewsByAuthor(author.getId())
+                   .forEach(n -> System.out.println("  " + n.getTitle()));
+        System.out.println("  Count: (expect 2)");
+
+        // --- TEST 7: archiveNews ---
+        System.out.println("\n--- TEST 7: archiveNews ---");
+        newsService.archiveNews(n3.getId(), editor.getId());
+        System.out.println("  Archived: " + newsService.getNewsById(n3.getId()).get().isArchived()
+                + " (expect true)");
+        System.out.println("  Latest count after archive: "
+                + newsService.getLatestNews(10).size() + " (expect 2)");
+
+        // --- TEST 8: edit archived guard ---
+        System.out.println("\n--- TEST 8: edit archived news guard ---");
+        try {
+            newsService.editNews(n3.getId(), editor.getId(), "Try edit");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (RuntimeException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // --- TEST 9: deleteNews ---
+        System.out.println("\n--- TEST 9: deleteNews ---");
+        newsService.deleteNews(n2.getId());
+        System.out.println("  After delete latest count: "
+                + newsService.getLatestNews(10).size() + " (expect 1)");
+
+        // --- TEST 10: author not found guard ---
+        System.out.println("\n--- TEST 10: publishNews unknown author guard ---");
+        try {
+            newsService.publishNews(999L, "Ghost News", "content");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (RuntimeException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
     }
     
     private static int readInt(Scanner scanner) {
