@@ -27,7 +27,10 @@ public class main {
         
         System.out.println("\n========== User Service Tests ============\n");
         runUserServiceTests();
-
+        
+        System.out.println("\n========== Teacher Service Tests ============\n");
+        runTeacherTests();
+        
         System.out.println("\n========== All Tests Complete ==========\n");
 
         Scanner scanner = new Scanner(System.in);
@@ -608,6 +611,147 @@ public class main {
             System.out.println("  Correctly rejected: " + ex.getMessage());
         }
 
+    }
+    private static void runTeacherTests() {
+        TeacherRepository    teacherRepo    = new TeacherRepository();
+        DepartmentRepository deptRepo       = new DepartmentRepository();
+        TeacherService       teacherService = new TeacherService(teacherRepo, deptRepo);
+
+        Department csDept = new Department();
+        csDept.setName("Computer Science");
+        csDept.setCode("CS");
+        csDept.setEmail("cs@uni.edu");
+        deptRepo.save(csDept);  
+
+        Department mathDept = new Department();
+        mathDept.setName("Mathematics");
+        mathDept.setCode("MATH");
+        mathDept.setEmail("math@uni.edu");
+        deptRepo.save(mathDept);
+
+ 
+        Teacher alice = new Teacher("alice@uni.edu", "Alice", "Johnson");
+        alice.setEmployeeId("T001");
+        alice.setTeacherPosition(TeacherPosition.PROFESSOR);
+        teacherRepo.save(alice);
+
+        Teacher bob = new Teacher("bob@uni.edu", "Bob", "Smith");
+        bob.setEmployeeId("T002");
+        bob.setTeacherPosition(TeacherPosition.LECTOR);
+        teacherRepo.save(bob);
+
+        Teacher carol = new Teacher("carol@uni.edu", "Carol", "White");
+        carol.setEmployeeId("T003");
+        carol.setTeacherPosition(TeacherPosition.SENIOR_LECTOR);
+        teacherRepo.save(carol);
+
+
+
+        teacherRepo.save(alice);
+        teacherRepo.save(bob);
+        teacherRepo.save(carol);
+
+
+        System.out.println("=== TEACHER SERVICE TESTS ===\n");
+
+        // ----- TEST 1: getTeacherByEmployeeId -----
+        
+        Teacher foundByEmpId = teacherService.getTeacherByEmployeeId("T002");
+        System.out.println("  Found by employeeId: " + foundByEmpId.getFullName());
+
+        try {
+            teacherService.getTeacherByEmployeeId("UNKNOWN");
+            System.out.println("  ERROR: should have thrown NoSuchElementException");
+        } catch (NoSuchElementException e) {
+            System.out.println("  Correctly threw NoSuchElementException: " + e.getMessage());
+        }
+
+        // ----- TEST 2: updateTeacherProfile -----
+        System.out.println("\n--- TEST 2: Update teacher profile ---");
+        TeacherProfileUpdateRequest updateReq = new TeacherProfileUpdateRequest("Alice", "Johnson-Brown",
+                        "alice.new@uni.edu", TeacherPosition.PROFESSOR);
+        Teacher updatedAlice = teacherService.updateTeacherProfile(alice.getEmployeeId(), updateReq);
+        System.out.println("  Updated teacher: " + updatedAlice.getFullName() + ", email: " +
+                updatedAlice.getEmail() + ", position: " + updatedAlice.getTeacherPosition());
+
+        try {
+            teacherService.updateTeacherProfile("UNKNOWN", updateReq);
+            System.out.println("  ERROR: should have thrown NoSuchElementException");
+        } catch (NoSuchElementException e) {
+            System.out.println("  Correctly threw NoSuchElementException (teacher not found)");
+        }
+
+        // ----- TEST 3: getTeacherCourses -----
+        System.out.println("\n--- TEST 3: Get courses taught by teacher ---");
+        List<Course> aliceCourses = teacherService.getTeacherCourses(alice.getEmployeeId());
+        System.out.println("  Alice's courses:");
+        aliceCourses.forEach(c -> System.out.println("    " + c.getName() + " (" + c.getCourseId() + ")"));
+
+        List<Course> bobCourses = teacherService.getTeacherCourses(bob.getEmployeeId());
+        System.out.println("  Bob's courses:");
+        bobCourses.forEach(c -> System.out.println("    " + c.getName()));
+
+        // ----- TEST 4: assignTeacherToDepartment & getTeachersByDepartment -----
+        System.out.println("\n--- TEST 4: Assign teachers to departments ---");
+        teacherService.assignTeacherToDepartment(alice.getEmployeeId(), csDept.getId());
+        teacherService.assignTeacherToDepartment(bob.getEmployeeId(), mathDept.getId());
+        teacherService.assignTeacherToDepartment(carol.getEmployeeId(), csDept.getId());
+
+        List<Teacher> csTeachers = teacherService.getTeachersByDepartment(csDept.getId());
+        System.out.println("  CS department teachers:");
+        csTeachers.forEach(t -> System.out.println("    " + t.getFullName()));
+
+        List<Teacher> mathTeachers = teacherService.getTeachersByDepartment(mathDept.getId());
+        System.out.println("  Math department teachers:");
+        mathTeachers.forEach(t -> System.out.println("    " + t.getFullName()));
+
+        try {
+            teacherService.getTeachersByDepartment(999L);
+            System.out.println("  ERROR: should have thrown NoSuchElementException");
+        } catch (NoSuchElementException e) {
+            System.out.println("  Correctly threw NoSuchElementException for unknown department");
+        }
+
+        // ----- TEST 5: searchTeachers -----
+        System.out.println("\n--- TEST 5: Search teachers by keyword ---");
+        List<Teacher> searchByAlice = teacherService.searchTeachers("Alice");
+        System.out.println("  Search 'Alice':");
+        searchByAlice.forEach(t -> System.out.println("    " + t.getFullName()));
+
+        List<Teacher> searchByEmail = teacherService.searchTeachers("uni.edu");
+        System.out.println("  Search 'uni.edu':");
+        searchByEmail.forEach(t -> System.out.println("    " + t.getFullName() + " (" + t.getEmail() + ")"));
+
+        List<Teacher> searchByPosition = teacherService.searchTeachers("LECTOR");
+        System.out.println("  Search 'LECTOR':");
+        searchByPosition.forEach(t -> System.out.println("    " + t.getFullName() + " - " + t.getTeacherPosition()));
+
+        // ----- TEST 6: Null / invalid argument checks -----
+        System.out.println("\n--- TEST 6: Invalid argument exceptions ---");
+        
+
+        try {
+            teacherService.getTeacherByEmployeeId(null);
+            System.out.println("  ERROR: should have thrown IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            System.out.println("  Correctly threw: " + e.getMessage());
+        }
+
+        try {
+            teacherService.updateTeacherProfile(alice.getEmployeeId(), null);
+            System.out.println("  ERROR: should have thrown IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            System.out.println("  Correctly threw: " + e.getMessage());
+        }
+
+        try {
+            teacherService.assignTeacherToDepartment(alice.getEmployeeId(), null);
+            System.out.println("  ERROR: should have thrown IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            System.out.println("  Correctly threw: " + e.getMessage());
+        }
+
+        System.out.println("\n=== All TeacherService tests completed ===");
     }
     
     

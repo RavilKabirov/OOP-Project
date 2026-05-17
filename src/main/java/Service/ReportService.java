@@ -108,14 +108,6 @@ public class ReportService {
         return null;
     }
 
-    /**
-     * @param report 
-     * @param format 
-     * @return
-     */
-    public File exportReport(Report report, ExportFormat format) {
-        // TODO implement here
-        return null;
-    }
+    
 
 }
