@@ -1,105 +1,140 @@
 
 import java.io.*;
 import java.util.*;
+import java.time.LocalDate;
 
-/**
- * 
- */
 public class NewsService {
-
-    /**
-     * Default constructor
-     */
-    public NewsService() {
-    }
-
-    /**
-     * 
-     */
     private NewsRepository newsRepository;
-
-    /**
-     * 
-     */
     private UserRepository userRepository;
 
-    /**
-     * @param authorId 
-     * @param title 
-     * @param content 
-     * @return
-     */
+    public NewsService(NewsRepository newsRepository, UserRepository userRepository) {
+    	this.newsRepository = newsRepository;
+    	this.userRepository = userRepository;
+    }
+    
     public News publishNews(Long authorId, String title, String content) {
-        // TODO implement here
-        return null;
+        userRepository.findById(authorId)
+        		.orElseThrow(() -> new RuntimeException(
+        				"Author not found with id: " + authorId
+        				));
+        if (title == null || title.isEmpty()) {
+        	throw new RuntimeException("Title can not be empty");
+        }
+        if (content == null || content.isEmpty()) {
+        	throw new RuntimeException("Content can not be empty");
+        }
+        News news = new News(null, title, content, authorId);
+        return newsRepository.save(news);
     }
 
-    /**
-     * @param newsId 
-     * @param editorId 
-     * @param newContent 
-     * @return
-     */
     public News editNews(Long newsId, Long editorId, String newContent) {
-        // TODO implement here
-        return null;
+        userRepository.findById(editorId)
+        		.orElseThrow(() -> new RuntimeException(
+        				"Editor not found with id: " + editorId
+        				));
+        News news = newsRepository.findById(newsId)
+        		.orElseThrow(() -> new RuntimeException(
+        				"News not found with id: " + newsId
+        				));
+        if (news.isArchived()) {
+        	throw new RuntimeException("Can not edit archived news");
+        }
+        if (newContent == null || newContent.isEmpty()) {
+        	throw new RuntimeException("Content can not be empty");
+        }
+        news.setContent(newContent);
+        return newsRepository.save(news);
     }
 
-    /**
-     * @param newsId 
-     * @param archivedBy 
-     * @return
-     */
     public void archiveNews(Long newsId, Long archivedBy) {
-        // TODO implement here
-        return null;
+        userRepository.findById(archivedBy)
+        		.orElseThrow(() -> new RuntimeException(
+        				"User not found with id: " + archivedBy
+        				));
+        News news = newsRepository.findById(newsId)
+        		.orElseThrow(() -> new RuntimeException(
+        				"News not found with id: " + newsId
+        				));
+        if (news.isArchived()) {
+        	throw new RuntimeException("News is already archived");
+        }
+        
+        news.setArchived(true);
+        newsRepository.save(news);
     }
 
-    /**
-     * @param newsId 
-     * @return
-     */
     public void deleteNews(Long newsId) {
-        // TODO implement here
-        return null;
+        newsRepository.findById(newsId)
+        	.orElseThrow(() -> new RuntimeException(
+        			"News not found with id: " + newsId
+        			));
+        
+        newsRepository.deleteById(newsId);
     }
 
-    /**
-     * @param limit 
-     * @return
-     */
     public List<News> getLatestNews(int limit) {
-        // TODO implement here
-        return null;
+        List<News> all = newsRepository.findAll();
+        
+        all.sort((a,b) -> b.getPublishedAt().compareTo(a.getPublishedAt()));
+        
+        List<News> result = new ArrayList<>();
+        for (News n : all) {
+        	if (!n.isArchived()) {
+        		result.add(n);
+        		if (result.size() == limit) break;
+        	}
+        }
+        return result;
     }
 
-    /**
-     * @param newsId 
-     * @return
-     */
     public Optional<News> getNewsById(Long newsId) {
-        // TODO implement here
-        return null;
+        return newsRepository.findById(newsId);
     }
 
-    /**
-     * @param keyword 
-     * @param fromDate 
-     * @param toDate 
-     * @return
-     */
     public List<News> searchNews(String keyword, LocalDate fromDate, LocalDate toDate) {
-        // TODO implement here
-        return null;
+        List<News> all = newsRepository.findAll();
+        List<News> result = new ArrayList<>();
+        
+        for (News news : all) {
+        	boolean matches = true;
+        	if (keyword != null && !keyword.isEmpty()) {
+        		String lower = keyword.toLowerCase();
+        		boolean inTitle = news.getTitle() != null && 
+        				news.getTitle().toLowerCase().contains(lower);
+        		boolean inContent = news.getContent() != null &&
+        				news.getContent().toLowerCase().contains(lower);
+        		if (!inTitle && !inContent) {
+        			matches = false;
+        		}
+        	}
+        	if (fromDate != null) {
+                LocalDate publishedDate = news.getPublishedAt().toLocalDate();
+                if (publishedDate.isBefore(fromDate)) {
+                    matches = false;
+                }
+            }
+
+            if (toDate != null) {
+                LocalDate publishedDate = news.getPublishedAt().toLocalDate();
+                if (publishedDate.isAfter(toDate)) {
+                    matches = false;
+                }
+            }
+
+            if (matches) {
+                result.add(news);
+            }
+        	
+        }
+        return result;
     }
 
-    /**
-     * @param authorId 
-     * @return
-     */
     public List<News> getNewsByAuthor(Long authorId) {
-        // TODO implement here
-        return null;
+        userRepository.findById(authorId)
+        		.orElseThrow(() -> new RuntimeException(
+        				"Author not found with id: " + authorId
+        				));
+        return newsRepository.findByAuthorId(authorId);
     }
 
 }
