@@ -34,6 +34,8 @@ public class main {
         System.out.println("\n========== Complaint Service Tests ============\n");
         runComplaintTests();
         
+        System.out.println("\n========== Message Service Tests ============\n");
+        runMessageTests();
         System.out.println("\n========== All Tests Complete ==========\n");
 
         Scanner scanner = new Scanner(System.in);
@@ -316,10 +318,10 @@ public class main {
         prof.addCourse(cs);
         teacherRepo.save(prof);
 
-        Enrollment eAliceMath    = enrollService.enrollStudent("S001", "MATH101");
+        Enrollment eAliceMath = enrollService.enrollStudent("S001", "MATH101");
         Enrollment eAlicePhysics = enrollService.enrollStudent("S001", "PHYS101");
-        Enrollment eAliceCS      = enrollService.enrollStudent("S001", "CS101");
-        Enrollment eBobMath      = enrollService.enrollStudent("S002", "MATH101");
+        Enrollment eAliceCS = enrollService.enrollStudent("S001", "CS101");
+        Enrollment eBobMath = enrollService.enrollStudent("S002", "MATH101");
 
         markService.assignMark(10L, "S001", "MATH101", 28.0, MarkType.FIRST_ATTESTATION, null);
         markService.assignMark(10L, "S001", "MATH101", 30.0, MarkType.SECOND_ATTESTATION, null);
@@ -922,7 +924,164 @@ public class main {
             System.out.println("  Correctly rejected: " + ex.getMessage());
         }
     }
-    
+    private static void runMessageTests() {
+
+        UserRepository    userRepo    = new UserRepository();
+        MessageRepository messageRepo = new MessageRepository();
+        MessageService    messageService = new MessageService(messageRepo, userRepo);
+
+        Teacher alice = new Teacher("alice@uni.edu", "Alice", "Prof") {};
+        alice.setId(1L);
+        alice.setEmployeeId("E001");
+        userRepo.save(alice);
+
+        Teacher bob = new Teacher("bob@uni.edu", "Bob", "Prof");
+        bob.setId(2L);
+        bob.setEmployeeId("E002");
+
+        userRepo.save(bob);
+
+        Teacher carol = new Teacher("carol@uni.edu", "Carol", "Prof");
+        carol.setId(3L);
+        carol.setEmployeeId("E003");
+        userRepo.save(carol);
+
+
+        User studentUser = new User("student@uni.edu", "Dave", "Student");
+        studentUser.setId(99L);
+        userRepo.save(studentUser);
+
+        // ── TEST 1: sendMessage ───────────────────────────────────────────────
+        System.out.println("--- TEST 1: sendMessage ---");
+        Message m1 = messageService.sendMessage(1L, 2L, "Meeting tomorrow", "Hi Bob, are you free?");
+        Message m2 = messageService.sendMessage(2L, 1L, "Re: Meeting tomorrow", "Sure, 10am works.");
+        Message m3 = messageService.sendMessage(1L, 3L, "Exam schedule", "Carol, please review the draft.");
+        Message m4 = messageService.sendMessage(3L, 2L, "Grades", "Bob, have you submitted grades?");
+        System.out.println("  m1: " + m1);
+        System.out.println("  m2: " + m2);
+        System.out.println("  m3: " + m3);
+        System.out.println("  m4: " + m4);
+
+        // ── TEST 2: getInbox ──────────────────────────────────────────────────
+        System.out.println("\n--- TEST 2: getInbox ---");
+        List<Message> aliceInbox = messageService.getInbox(1L);
+        System.out.println("  Alice inbox: " + aliceInbox.size() + " (expect 1)");
+        aliceInbox.forEach(m -> System.out.println("  - [" + m.getSubject() + "]"));
+
+        List<Message> bobInbox = messageService.getInbox(2L);
+        System.out.println("  Bob inbox: " + bobInbox.size() + " (expect 2)");
+        bobInbox.forEach(m -> System.out.println("  - [" + m.getSubject() + "]"));
+
+        // ── TEST 3: getSentMessages ───────────────────────────────────────────
+        System.out.println("\n--- TEST 3: getSentMessages ---");
+        List<Message> aliceSent = messageService.getSentMessages(1L);
+        System.out.println("  Alice sent: " + aliceSent.size() + " (expect 2)");
+
+        List<Message> carolSent = messageService.getSentMessages(3L);
+        System.out.println("  Carol sent: " + carolSent.size() + " (expect 1)");
+
+        // ── TEST 4: getMessageById ────────────────────────────────────────────
+        System.out.println("\n--- TEST 4: getMessageById ---");
+        messageService.getMessageById(m1.getId())
+                .ifPresent(m -> System.out.println("  Found: [" + m.getSubject() + "]"));
+        System.out.println("  Missing id empty: "
+                + messageService.getMessageById(999L).isEmpty() + " (expect true)");
+
+        // ── TEST 5: markAsRead ────────────────────────────────────────────────
+        System.out.println("\n--- TEST 5: markAsRead ---");
+        System.out.println("  m1 isRead before: " + m1.isRead() + " (expect false)");
+        messageService.markAsRead(m1.getId(), 2L); 
+        System.out.println("  m1 isRead after:  " + m1.isRead() + " (expect true)");
+
+        // ── TEST 6: markAsRead — wrong recipient guard ────────────────────────
+        System.out.println("\n--- TEST 6: markAsRead wrong recipient guard ---");
+        try {
+            messageService.markAsRead(m1.getId(), 3L);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 7: getConversation ───────────────────────────────────────────
+        System.out.println("\n--- TEST 7: getConversation Alice ↔ Bob ---");
+        List<Message> convo = messageService.getConversation(1L, 2L);
+        System.out.println("  Messages in thread: " + convo.size() + " (expect 2)");
+        convo.forEach(m -> System.out.println("  [" + m.getSenderId() + "→" + m.getRecipientId() + "] " + m.getSubject()));
+
+        // ── TEST 8: deleteMessage — soft delete from sender's view ────────────
+        System.out.println("\n--- TEST 8: deleteMessage (sender deletes m3) ---");
+        messageService.deleteMessage(m3.getId(), 1L); 
+        List<Message> aliceSentAfter = messageService.getSentMessages(1L);
+        System.out.println("  Alice sent after delete: " + aliceSentAfter.size() + " (expect 1)");
+        List<Message> carolInbox = messageService.getInbox(3L);
+        System.out.println("  Carol inbox still has m3: " + carolInbox.size() + " (expect 1)");
+
+        // ── TEST 9: deleteMessage — unauthorized employee guard ───────────────
+        System.out.println("\n--- TEST 9: deleteMessage unauthorized guard ---");
+        try {
+            messageService.deleteMessage(m4.getId(), 1L); 
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 10: non-employee cannot send guard ───────────────────────────
+        System.out.println("\n--- TEST 10: non-employee send guard ---");
+        try {
+            messageService.sendMessage(99L, 1L, "Hello", "Can I message a teacher?");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 11: non-employee cannot receive guard ────────────────────────
+        System.out.println("\n--- TEST 11: non-employee receive guard ---");
+        try {
+            messageService.sendMessage(1L, 99L, "Hello", "Messaging a student?");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 12: self-message guard ───────────────────────────────────────
+        System.out.println("\n--- TEST 12: self-message guard ---");
+        try {
+            messageService.sendMessage(1L, 1L, "Note to self", "...");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 13: blank subject guard ─────────────────────────────────────
+        System.out.println("\n--- TEST 13: blank subject guard ---");
+        try {
+            messageService.sendMessage(1L, 2L, "  ", "Body text");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 14: unknown sender guard ─────────────────────────────────────
+        System.out.println("\n--- TEST 14: unknown sender guard ---");
+        try {
+            messageService.sendMessage(999L, 1L, "Subject", "Body");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 15: conversation excludes messages deleted by viewer ─────────
+        System.out.println("\n--- TEST 15: conversation respects soft-delete ---");
+        Message m5 = messageService.sendMessage(1L, 2L, "Temp note", "Ignore this.");
+        messageService.deleteMessage(m5.getId(), 1L);
+        List<Message> convoAfter = messageService.getConversation(1L, 2L);
+
+        System.out.println("  Alice's convo size after her delete: "
+                + convoAfter.size() + " (expect 2)");
+        List<Message> bobConvo = messageService.getConversation(2L, 1L);
+        System.out.println("  Bob's convo size (still sees m5): "
+                + bobConvo.size() + " (expect 3)");
+    }
     
     private static int readInt(Scanner scanner) {
         while (!scanner.hasNextInt()) {

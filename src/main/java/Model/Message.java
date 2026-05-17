@@ -1,111 +1,61 @@
-import java.io.*;
-import java.util.*;
 import java.time.LocalDateTime;
-
-public class Message{
+public class Message {
 
     private Long id;
-    private Employee sender;
-    private Employee recipient;
+    private Long senderId;      
+    private Long recipientId;   
     private String subject;
     private String body;
     private LocalDateTime sentAt;
-    private Boolean isRead;
-    private Boolean isDeletedBySender;
-    private Boolean isDeletedByRecipient;
+    private boolean isRead;
+    private boolean deletedBySender;
+    private boolean deletedByRecipient;
 
-    public Message(){
-        this.isRead=false;
-        this.isDeletedBySender=false;
-        this.isDeletedByRecipient=false;
-        this.sentAt=LocalDateTime.now();
-    }
-
-    public Long getId(){
-        return id;
-    }
-    public void setId(Long a){
-        this.id=a;
-    }
-    public Employee getSender(){
-        return sender;
-    }
-    public void setSender(Employee a){
-        this.sender=a;
-    }
-    public Employee getRecipient(){
-        return recipient;
-    }
-    public void setRecipient(Employee a){
-        this.recipient=a;
+    public Message() {
+        this.sentAt = LocalDateTime.now();
+        this.isRead = false;
+        this.deletedBySender = false;
+        this.deletedByRecipient = false;
     }
 
-    public String getSubject(){
-        return subject;
+    public Message(Long senderId, Long recipientId, String subject, String body) {
+        this();
+        this.senderId = senderId;
+        this.recipientId = recipientId;
+        this.subject = subject;
+        this.body = body;
     }
 
-    public void setSubject(String a){
-        this.subject=a;
-    }
-    public String getBody(){
-        return body;
-    }
-    public void setBody(String a){
-        this.body=a;
-    }
-    public LocalDateTime getSentAt(){
-        return sentAt;
-    }
 
-    public void setSentAt(LocalDateTime a){
-        this.sentAt=a;
-    }
+    public Long getId()  { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Boolean getIsRead(){
-        return isRead;
-    }
-    public void setIsRead(Boolean a){
-        this.isRead=a;
-    }
-    public Boolean getIsDeletedBySender(){
-        return isDeletedBySender;
-    }
+    public Long getSenderId() { return senderId; }
+    public void setSenderId(Long v){ this.senderId = v; }
 
-    public void setIsDeletedBySender(Boolean a){
-        this.isDeletedBySender=a;
-    }
+    public Long getRecipientId(){ return recipientId; }
+    public void setRecipientId(Long v){ this.recipientId = v; }
 
-    public Boolean getIsDeletedByRecipient(){
-        return isDeletedByRecipient;
-    }
+    public String getSubject() { return subject; }
+    public void setSubject(String v){ this.subject = v; }
 
-    public void setIsDeletedByRecipient(Boolean a){
-        this.isDeletedByRecipient=a;
-    }
+    public String getBody(){ return body; }
+    public void setBody(String v){ this.body = v; }
 
-    public void markAsRead(){
-        this.isRead=true;
-    }
+    public LocalDateTime getSentAt() { return sentAt; }
+    public void setSentAt(LocalDateTime v){ this.sentAt = v; }
 
-    public void deleteForSender(){
-        this.isDeletedBySender=true;
-    }
+    public boolean isRead(){ return isRead; }
+    public void  setRead(boolean v) { this.isRead = v; }
 
-    public void deleteForRecipient(){
-        this.isDeletedByRecipient=true;
-    }
+    public boolean isDeletedBySender() { return deletedBySender; }
+    public void setDeletedBySender(boolean v) { this.deletedBySender = v; }
 
-    public boolean isVisibleTo(Employee a){
-        if(a==sender){
-            return !isDeletedBySender;
-        }
-        if(a==recipient){
-            return !isDeletedByRecipient;
-        }
-        return false;
-    }
+    public boolean isDeletedByRecipient() { return deletedByRecipient; }
+    public void setDeletedByRecipient(boolean v) { this.deletedByRecipient = v; }
 
-    public String toString(){
-        return id+" "+subject;
+    @Override
+    public String toString() {
+        return "Message{id=" + id  + ", from=" + senderId  + ", to="   + recipientId  + ", subject='" + subject + "'"  + ", read=" + isRead  + ", sentAt=" + sentAt + "}";
     }
 }
