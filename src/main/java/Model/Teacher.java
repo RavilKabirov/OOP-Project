@@ -1,56 +1,45 @@
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.*;
-import java.util.*;
+public class Teacher extends Employee implements IResearcher {
 
-/**
- * 
- */
-public class Teacher extends Employee {
-    private List<Course> courses;
-    private TeacherPosition teacherPosition;
+    private List<Course>       courses;
+    private TeacherPosition    teacherPosition;
+    private List<ResearchPaper> publications = new ArrayList<>();
 
-    
- 
     public Teacher(String email, String firstName, String lastName) {
-		super(email, firstName, lastName);
-		this.courses = new ArrayList<>();
-	}
-
-	
-
-    /**
-     * @return
-     */
-    public List<Course> getCourses() {
-        return courses;
+    		super(email, firstName, lastName);
+        this.courses = new ArrayList<>();
     }
 
-    /**
-     * @param value
-     */
-    public void addCourse(Course value) {
-        courses.add(value);
+
+    public List<Course> getCourses()              { return courses; }
+    public void addCourse(Course value)           { courses.add(value); }
+    public void removeCourse(Course value)        { courses.remove(value); }
+
+    public TeacherPosition getTeacherPosition()           { return teacherPosition; }
+    public void setTeacherPosition(TeacherPosition value) { this.teacherPosition = value; }
+
+
+    @Override
+    public String getResearcherId() {
+        return getId() != null ? getId().toString() : getEmployeeId();
     }
 
-    /**
-     * @param value
-     */
-    public void removeCourse(Course value) {
-        courses.remove(value);
+    @Override
+    public List<ResearchPaper> getPublications() {
+        return publications;
     }
 
-    /**
-     * @return
-     */
-    public TeacherPosition getTeacherPosition() {
-        return teacherPosition;
+    @Override
+    public void addPublication(ResearchPaper paper) {
+        if (paper != null && !publications.contains(paper)) {
+            publications.add(paper);
+        }
     }
 
-    /**
-     * @param value
-     */
-    public void setTeacherPosition(TeacherPosition value) {
-        this.teacherPosition=value;
+    @Override
+    public void removePublication(Long paperId) {
+        publications.removeIf(p -> p.getId() != null && p.getId().equals(paperId));
     }
-
 }

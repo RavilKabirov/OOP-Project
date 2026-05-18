@@ -1,60 +1,21 @@
+import java.util.List;
 
-import java.io.*;
-import java.util.*;
 
-/**
- * 
- */
-public class IResearcher {
+public interface IResearcher {
 
-    /**
-     * Default constructor
-     */
-    public IResearcher() {
+    String getResearcherId();
+
+    List<ResearchPaper> getPublications();
+
+    void addPublication(ResearchPaper paper);
+
+    void removePublication(Long paperId);
+
+    default int getTotalCitations() {
+        int total = 0;
+        for (ResearchPaper p : getPublications()) {
+            total += p.getCitationCount();
+        }
+        return total;
     }
-
-    /**
-     * 
-     */
-    public void addPublication;
-
-
-    /**
-     * @return
-     */
-    public String getResearcherId() {
-        // TODO implement here
-        return "";
-    }
-
-    /**
-     * @return
-     */
-    public List<ResearchPaper> getPublications() {
-        // TODO implement here
-        return null;
-    }
-
-    /**
-     * @param paper
-     */
-    public void addPublication(ResearchPaper paper) {
-        // TODO implement here
-    }
-
-    /**
-     * @param paperId
-     */
-    public void removePublication(Long paperId) {
-        // TODO implement here
-    }
-
-    /**
-     * @return
-     */
-    public int getTotalCitations() {
-        // TODO implement here
-        return 0;
-    }
-
 }

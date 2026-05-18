@@ -45,6 +45,9 @@ public class main {
 
         System.out.println("\n========== Report Service Tests ============\n");
         runReportTests();
+
+        System.out.println("\n========== Research Service Tests ============\n");
+        runResearchTests();
         System.out.println("\n========== All Tests Complete ==========\n");
         
 
@@ -1517,6 +1520,210 @@ public class main {
                     java.time.LocalDate.of(2025, 1, 1));
             System.out.println("  ERROR: should have thrown!");
         } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+    }
+
+    private static void runResearchTests() {
+
+        UserRepository            userRepo   = new UserRepository();
+        ResearchPaperRepository   paperRepo  = new ResearchPaperRepository();
+        AuthorshipRepository      authRepo   = new AuthorshipRepository();
+        ResearchService           rs         =
+                new ResearchService(paperRepo, authRepo, userRepo);
+
+        Teacher prof = new Teacher("turing@uni.edu", "Alan", "Turing");
+        prof.setId(1L);
+        prof.setEmployeeId("T001");
+
+        prof.setTeacherPosition(TeacherPosition.PROFESSOR);
+        userRepo.save(prof);
+
+        MasterStudent master = new MasterStudent();
+        master.setId(2L);
+        master.setStudentId("M001");
+        master.setFullName("Grace", "Hopper");
+        master.setEmail("hopper@uni.edu");
+        master.setThesisTopic("Compilers");
+        userRepo.save(master);
+
+        PHDStudent phd = new PHDStudent();
+        phd.setId(3L);
+        phd.setStudentId("P001");
+        phd.setDissertationTopic("Information Theory");
+        phd.setSupervisor(prof);
+        userRepo.save(phd);
+
+        User plainUser = new User("plain@uni.edu", "Plain", "User");
+        plainUser.setId(99L);
+        userRepo.save(plainUser);
+
+        // ── TEST 1: createPaper ───────────────────────────────────────────────
+        System.out.println("--- TEST 1: createPaper ---");
+        ResearchPaper p1 = rs.createPaper(1L, new PaperCreationRequest(
+                "On Computable Numbers",
+                "A foundational paper on computability theory.",
+                PaperType.JOURNAL_ARTICLE,
+                List.of("computability", "Turing machine", "decidability")));
+
+        ResearchPaper p2 = rs.createPaper(2L, new PaperCreationRequest(
+                "A Survey of Compiler Design",
+                "Overview of compiler construction techniques.",
+                PaperType.CONFERENCE_PAPER,
+                List.of("compilers", "parsing", "code generation")));
+
+        ResearchPaper p3 = rs.createPaper(3L, new PaperCreationRequest(
+                "A Mathematical Theory of Communication",
+                "Entropy, information channels, and error correction.",
+                PaperType.JOURNAL_ARTICLE,
+                List.of("information theory", "entropy", "channel capacity")));
+
+        System.out.println("  p1: " + p1);
+        System.out.println("  p2: " + p2);
+        System.out.println("  p3: " + p3);
+
+        // ── TEST 2: auto-registered as first author ───────────────────────────
+        System.out.println("\n--- TEST 2: creator auto-registered as author ---");
+        List<Authorship> p1Authors = rs.getPaperAuthors(p1.getId());
+        System.out.println("  p1 authors: " + p1Authors.size() + " (expect 1)");
+        System.out.println("  " + p1Authors.get(0));
+
+        // ── TEST 3: addAuthor ─────────────────────────────────────────────────
+        System.out.println("\n--- TEST 3: addAuthor ---");
+        rs.addAuthor(p1.getId(), 2L, 2, "Literature review");
+        rs.addAuthor(p1.getId(), 3L, 3, "Proof verification");
+        List<Authorship> p1AuthorsNow = rs.getPaperAuthors(p1.getId());
+        System.out.println("  p1 authors after adds: " + p1AuthorsNow.size() + " (expect 3)");
+        p1AuthorsNow.forEach(a -> System.out.println("  " + a));
+
+        // ── TEST 4: getResearcherPapers ───────────────────────────────────────
+        System.out.println("\n--- TEST 4: getResearcherPapers ---");
+        System.out.println("  Turing's papers: "
+                + rs.getResearcherPapers(1L).size() + " (expect 1)");
+        System.out.println("  Hopper's papers: "
+                + rs.getResearcherPapers(2L).size() + " (expect 2)");
+        System.out.println("  Shannon's papers: "
+                + rs.getResearcherPapers(3L).size() + " (expect 2)");
+
+        // ── TEST 5: submitPaperForReview ──────────────────────────────────────
+        System.out.println("\n--- TEST 5: submitPaperForReview ---");
+        rs.submitPaperForReview(p1.getId());
+        System.out.println("  p1 status: " + p1.getStatus() + " (expect UNDER_REVIEW)");
+
+        // ── TEST 6: publishPaper ──────────────────────────────────────────────
+        System.out.println("\n--- TEST 6: publishPaper ---");
+        rs.publishPaper(p1.getId(), "10.1112/plms/s2-42.1.230", "https://papers.uni.edu/p1.pdf");
+        System.out.println("  p1 status: "  + p1.getStatus()  + " (expect PUBLISHED)");
+        System.out.println("  p1 DOI: "     + p1.getDoi());
+        System.out.println("  p1 fileUrl: " + p1.getFileUrl());
+
+        // ── TEST 7: citePaper ─────────────────────────────────────────────────
+        System.out.println("\n--- TEST 7: citePaper ---");
+        rs.citePaper(p1.getId());
+        rs.citePaper(p1.getId());
+        rs.citePaper(p1.getId());
+        System.out.println("  p1 citations: " + p1.getCitationCount() + " (expect 3)");
+
+        // ── TEST 8: IResearcher.getTotalCitations ─────────────────────────────
+        System.out.println("\n--- TEST 8: getTotalCitations ---");
+        System.out.println("  Turing total citations: "
+                + prof.getTotalCitations() + " (expect 3)");
+        System.out.println("  Hopper total citations: "
+                + master.getTotalCitations() + " (expect 3 — co-author of p1)");
+
+        // ── TEST 9: rejectPaper and resubmit ──────────────────────────────────
+        System.out.println("\n--- TEST 9: rejectPaper + resubmit ---");
+        rs.submitPaperForReview(p2.getId());
+        rs.rejectPaper(p2.getId(), "Insufficient novelty");
+        System.out.println("  p2 status after reject: " + p2.getStatus()
+                + " (expect REJECTED)");
+        rs.submitPaperForReview(p2.getId()); // can re-submit from REJECTED
+        System.out.println("  p2 status after resubmit: " + p2.getStatus()
+                + " (expect UNDER_REVIEW)");
+
+        // ── TEST 10: removeAuthor ─────────────────────────────────────────────
+        System.out.println("\n--- TEST 10: removeAuthor ---");
+        rs.removeAuthor(p1.getId(), 3L); // remove Shannon from p1
+        System.out.println("  p1 authors after remove: "
+                + rs.getPaperAuthors(p1.getId()).size() + " (expect 2)");
+        System.out.println("  Shannon's papers now: "
+                + rs.getResearcherPapers(3L).size() + " (expect 1 — only p3)");
+
+        // ── TEST 11: searchPapers — title query ───────────────────────────────
+        System.out.println("\n--- TEST 11: searchPapers by title ---");
+        List<ResearchPaper> found = rs.searchPapers("theory", null);
+        System.out.println("  'theory' hits: " + found.size() + " (expect 2)");
+        found.forEach(p -> System.out.println("  - " + p.getTitle()));
+
+        // ── TEST 12: searchPapers — filter by type ────────────────────────────
+        System.out.println("\n--- TEST 12: searchPapers filter by JOURNAL_ARTICLE ---");
+        PaperSearchFilters typeFilter = new PaperSearchFilters()
+                .withType(PaperType.JOURNAL_ARTICLE);
+        List<ResearchPaper> journals = rs.searchPapers(null, typeFilter);
+        System.out.println("  Journal articles: " + journals.size() + " (expect 2)");
+
+        // ── TEST 13: searchPapers — filter by status ──────────────────────────
+        System.out.println("\n--- TEST 13: searchPapers filter by PUBLISHED ---");
+        PaperSearchFilters statusFilter = new PaperSearchFilters()
+                .withStatus(ResearchStatus.PUBLISHED);
+        List<ResearchPaper> published = rs.searchPapers(null, statusFilter);
+        System.out.println("  Published papers: " + published.size() + " (expect 1)");
+
+        // ── TEST 14: searchPapers — filter by keyword ─────────────────────────
+        System.out.println("\n--- TEST 14: searchPapers filter by keyword 'entropy' ---");
+        PaperSearchFilters kwFilter = new PaperSearchFilters().withKeyword("entropy");
+        List<ResearchPaper> kwHits = rs.searchPapers(null, kwFilter);
+        System.out.println("  'entropy' keyword hits: " + kwHits.size() + " (expect 1)");
+
+        // ── TEST 15: searchPapers — filter by researcher ──────────────────────
+        System.out.println("\n--- TEST 15: searchPapers filter by researcherId ---");
+        PaperSearchFilters rFilter = new PaperSearchFilters().withResearcherId(2L);
+        List<ResearchPaper> hopperPapers = rs.searchPapers(null, rFilter);
+        System.out.println("  Hopper's papers via filter: " + hopperPapers.size() + " (expect 2)");
+
+        // ── TEST 16: guard — non-researcher cannot create paper ───────────────
+        System.out.println("\n--- TEST 16: non-researcher create guard ---");
+        try {
+            rs.createPaper(99L, new PaperCreationRequest(
+                    "Unauthorized", "", PaperType.PREPRINT, null));
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 17: guard — add author to PUBLISHED paper ────────────────────
+        System.out.println("\n--- TEST 17: addAuthor to PUBLISHED paper guard ---");
+        try {
+            rs.addAuthor(p1.getId(), 3L, 4, "Late addition");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 18: guard — publish without UNDER_REVIEW ─────────────────────
+        System.out.println("\n--- TEST 18: publish DRAFT paper guard ---");
+        try {
+            rs.publishPaper(p3.getId(), "10.0000/test", "https://test.edu/p3.pdf");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 19: guard — cite non-published paper ─────────────────────────
+        System.out.println("\n--- TEST 19: cite non-published paper guard ---");
+        try {
+            rs.citePaper(p3.getId()); // p3 is still DRAFT
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 20: guard — remove last author ───────────────────────────────
+        System.out.println("\n--- TEST 20: remove last author guard ---");
+        try {
+            rs.removeAuthor(p3.getId(), 3L); // Shannon is the only author of p3
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
             System.out.println("  Correctly rejected: " + ex.getMessage());
         }
     }
