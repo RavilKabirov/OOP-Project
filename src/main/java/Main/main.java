@@ -42,6 +42,12 @@ public class main {
         
         System.out.println("\n========== News Service Tests ============\n");
         runNewsTests();
+
+        System.out.println("\n========== Report Service Tests ============\n");
+        runReportTests();
+
+        System.out.println("\n========== Research Service Tests ============\n");
+        runResearchTests();
         System.out.println("\n========== All Tests Complete ==========\n");
         
 
@@ -1279,6 +1285,452 @@ public class main {
         }
     }
     
+
+    private static void runReportTests() {
+
+        StudentRepository    studentRepo   = new StudentRepository();
+        CourseRepository     courseRepo    = new CourseRepository();
+        EnrollmentRepository enrollRepo    = new EnrollmentRepository();
+        TeacherRepository    teacherRepo   = new TeacherRepository();
+        MarkRepository       markRepo      = new MarkRepository();
+        DepartmentRepository deptRepo      = new DepartmentRepository();
+        FacultyRepository    facultyRepo   = new FacultyRepository();
+
+        EnrollmentService enrollService =
+                new EnrollmentService(enrollRepo, studentRepo, courseRepo);
+        MarkService markService =
+                new MarkService(markRepo, enrollRepo, teacherRepo);
+        FacultyService facultyService =
+                new FacultyService(facultyRepo, deptRepo, teacherRepo);
+
+        ReportService reportService = new ReportService(
+                enrollRepo, markRepo, teacherRepo,
+                studentRepo, courseRepo, deptRepo, facultyRepo);
+
+        School engineering = facultyService.createFaculty(
+                new FacultyCreationRequest("School of Engineering"));
+
+        Department csDept = new Department();
+        csDept.setName("Computer Science");
+        csDept.setCode("CS");
+        facultyService.addDepartmentToFaculty(engineering.getId(), csDept);
+
+        Department eeDept = new Department();
+        eeDept.setName("Electrical Engineering");
+        eeDept.setCode("EE");
+        facultyService.addDepartmentToFaculty(engineering.getId(), eeDept);
+
+        Teacher profA = new Teacher("turing@uni.edu", "Alan", "Turing");
+        profA.setId(1L);
+        profA.setEmployeeId("T001");
+        profA.setDepartment(csDept);
+        profA.setTeacherPosition(TeacherPosition.PROFESSOR);
+        teacherRepo.save(profA);
+
+        Teacher profB = new Teacher("ada@uni.edu", "Ada", "Lovelace");
+        profB.setId(2L);
+        profB.setEmployeeId("T002");
+        profB.setDepartment(csDept);
+        profB.setTeacherPosition(TeacherPosition.SENIOR_LECTOR);
+        teacherRepo.save(profB);
+
+        Teacher profC = new Teacher("tesla@uni.edu", "Nikola", "Tesla") {};
+        profC.setId(3L);
+        profC.setEmployeeId("T003");
+        profC.setDepartment(eeDept);
+        profC.setTeacherPosition(TeacherPosition.LECTOR);
+        teacherRepo.save(profC);
+
+        Course algo = new Course();
+        algo.setCourseId("CS101"); algo.setName("Algorithms"); algo.setCredits(4);
+        algo.addTeacher(profA);
+        profA.addCourse(algo);
+        courseRepo.save(algo);
+
+        Course oop = new Course();
+        oop.setCourseId("CS102"); oop.setName("OOP"); oop.setCredits(3);
+        oop.addTeacher(profB);
+        profB.addCourse(oop);
+        courseRepo.save(oop);
+
+        Course circuits = new Course();
+        circuits.setCourseId("EE101"); circuits.setName("Circuits"); circuits.setCredits(3);
+        circuits.addTeacher(profC);
+        profC.addCourse(circuits);
+        courseRepo.save(circuits);
+
+        Student alice = new Student() {};
+        alice.setId(10L); alice.setStudentId("S001");
+        alice.setFullName("Alice", "Smith"); alice.setYearOfStudy(2);
+        studentRepo.save(alice);
+
+        Student bob = new Student() {};
+        bob.setId(11L); bob.setStudentId("S002");
+        bob.setFullName("Bob", "Jones"); bob.setYearOfStudy(1);
+        studentRepo.save(bob);
+
+        Student carol = new Student() {};
+        carol.setId(12L); carol.setStudentId("S003");
+        carol.setFullName("Carol", "White"); carol.setYearOfStudy(3);
+        studentRepo.save(carol);
+
+        Enrollment eAliceAlgo = enrollService.enrollStudent("S001", "CS101");
+        Enrollment eAliceOop  = enrollService.enrollStudent("S001", "CS102");
+        Enrollment eBobAlgo   = enrollService.enrollStudent("S002", "CS101");
+        Enrollment eBobCirc   = enrollService.enrollStudent("S002", "EE101");
+        Enrollment eCarolOop  = enrollService.enrollStudent("S003", "CS102");
+        Enrollment eCarolCirc = enrollService.enrollStudent("S003", "EE101");
+
+        markService.assignMark(1L,"S001","CS101", 28,MarkType.FIRST_ATTESTATION,null);
+        markService.assignMark(1L,"S001","CS101", 30,MarkType.SECOND_ATTESTATION,null);
+        markService.assignMark(1L,"S001","CS101", 35,MarkType.FINAL_EXAM,null);   // 93
+
+        markService.assignMark(2L,"S001","CS102", 20,MarkType.FIRST_ATTESTATION,null);
+        markService.assignMark(2L,"S001","CS102", 18,MarkType.SECOND_ATTESTATION,null);
+        markService.assignMark(2L,"S001","CS102", 22,MarkType.FINAL_EXAM,null);   // 60
+
+        markService.assignMark(1L,"S002","CS101", 15,MarkType.FIRST_ATTESTATION,null);
+        markService.assignMark(1L,"S002","CS101", 14,MarkType.SECOND_ATTESTATION,null);
+        markService.assignMark(1L,"S002","CS101", 20,MarkType.FINAL_EXAM,null);   // 49
+
+        markService.assignMark(3L,"S002","EE101", 25,MarkType.FIRST_ATTESTATION,null);
+        markService.assignMark(3L,"S002","EE101", 25,MarkType.SECOND_ATTESTATION,null);
+        markService.assignMark(3L,"S002","EE101", 25,MarkType.FINAL_EXAM,null);   // 75
+
+        markService.assignMark(2L,"S003","CS102", 30,MarkType.FIRST_ATTESTATION,null);
+        markService.assignMark(2L,"S003","CS102", 30,MarkType.SECOND_ATTESTATION,null);
+        markService.assignMark(2L,"S003","CS102", 30,MarkType.FINAL_EXAM,null);   // 90
+
+        enrollService.completeCourse(eAliceAlgo.getId(), 30, 25, 38);
+        enrollService.completeCourse(eAliceOop.getId(),  10, 15, 35);
+        enrollService.completeCourse(eCarolOop.getId(),  30, 30, 30);
+
+        ReportPeriod allTime = ReportPeriod.all();
+
+        // ── TEST 1: generateEnrollmentStatistics ──────────────────────────────
+        System.out.println("--- TEST 1: generateEnrollmentStatistics ---");
+        EnrollmentStatistics stats = reportService.generateEnrollmentStatistics(allTime);
+        System.out.println("  " + stats);
+        System.out.println("  total: "     + stats.getTotalEnrollments()     + " (expect 6)");
+        System.out.println("  completed: " + stats.getCompletedEnrollments() + " (expect 3)");
+        System.out.println("  active: "    + stats.getActiveEnrollments()    + " (expect 3)");
+        System.out.println("  students: "  + stats.getUniqueStudents()       + " (expect 3)");
+        System.out.println("  courses: "   + stats.getUniqueCourses()        + " (expect 3)");
+
+        // ── TEST 2: generateCoursePerformanceReport ───────────────────────────
+        System.out.println("\n--- TEST 2: generateCoursePerformanceReport CS101 ---");
+        CoursePerformanceReport cpr = reportService.generateCoursePerformanceReport("CS101");
+        System.out.println("  " + cpr);
+        System.out.println("  enrollments: " + cpr.getTotalEnrollments() + " (expect 2)");
+        System.out.println("  completed: "   + cpr.getCompletedEnrollments() + " (expect 1)");
+        System.out.printf ("  avg: %.2f (expect 71.00 = (93+49)/2)%n", cpr.getAverageTotal());
+        System.out.println("  pass: " + cpr.getPassCount() + " (expect 1)");
+        System.out.println("  fail: " + cpr.getFailCount() + " (expect 1)");
+
+        // ── TEST 3: generateStudentProgressReport ─────────────────────────────
+        System.out.println("\n--- TEST 3: generateStudentProgressReport Alice ---");
+        StudentProgressReport spr = reportService.generateStudentProgressReport("S001");
+        System.out.println("  " + spr);
+        System.out.println("  GPA: "     + String.format("%.2f", spr.getGpa())
+                + " (expect 76.50 = (93+60)/2)");
+        System.out.println("  credits: " + spr.getTotalCreditsEarned() + " (expect 7)");
+        System.out.println("  completed: " + spr.getCompletedCourses() + " (expect 2)");
+        System.out.println("  active: "    + spr.getActiveCourses()    + " (expect 0)");
+
+        // ── TEST 4: generateStudentProgressReport Bob ──────────────────────────
+        System.out.println("\n--- TEST 4: generateStudentProgressReport Bob ---");
+        StudentProgressReport sprBob = reportService.generateStudentProgressReport("S002");
+        System.out.println("  " + sprBob);
+        System.out.println("  completed: " + sprBob.getCompletedCourses() + " (expect 0)");
+        System.out.println("  active: "    + sprBob.getActiveCourses()    + " (expect 2)");
+        System.out.printf ("  GPA: %.2f (expect 62.00 = (49+75)/2)%n", sprBob.getGpa());
+
+        // ── TEST 5: generateTeacherWorkloadReport ─────────────────────────────
+        System.out.println("\n--- TEST 5: generateTeacherWorkloadReport Turing ---");
+        Semester fall2024 = new Semester(2024, Semester.SemesterTerm.FALL);
+        // enrollments were created now (today), which falls in Fall 2024 if run in Sep-Dec 2024
+        // Use allTime period via a wide semester to guarantee inclusion
+        Semester wideSemester = new Semester(2025, Semester.SemesterTerm.SPRING);
+        TeacherWorkloadReport twr = reportService.generateTeacherWorkloadReport(1L, wideSemester);
+        System.out.println("  " + twr);
+        System.out.println("  courses: " + twr.getTotalCourses() + " (expect 1 — CS101)");
+
+        // ── TEST 6: generateDepartmentReport ─────────────────────────────────
+        System.out.println("\n--- TEST 6: generateDepartmentReport CS dept ---");
+        DepartmentReport dr = reportService.generateDepartmentReport(
+                csDept.getId(), allTime);
+        System.out.println("  " + dr);
+        System.out.println("  teachers: " + dr.getTotalTeachers() + " (expect 2)");
+        System.out.println("  courses: "  + dr.getTotalCourses()  + " (expect 2)");
+        System.out.println("  enrollments: " + dr.getTotalEnrollments() + " (expect 4)");
+        System.out.println("  completed: "   + dr.getCompletedEnrollments() + " (expect 3)");
+
+        // ── TEST 7: generateFacultyReport ─────────────────────────────────────
+        System.out.println("\n--- TEST 7: generateFacultyReport Engineering ---");
+        FacultyReport fr = reportService.generateFacultyReport(
+                engineering.getId(), allTime);
+        System.out.println("  " + fr);
+        System.out.println("  departments: " + fr.getTotalDepartments() + " (expect 2)");
+        System.out.println("  enrollments: " + fr.getTotalEnrollments() + " (expect 6)");
+        System.out.println("  completed: "   + fr.getCompletedEnrollments() + " (expect 3)");
+
+        // ── TEST 8: generateHRReport ──────────────────────────────────────────
+        System.out.println("\n--- TEST 8: generateHRReport ---");
+        HRReport hr = reportService.generateHRReport();
+        System.out.println("  " + hr);
+        System.out.println("  total teachers: " + hr.getTotalTeachers() + " (expect 3)");
+        System.out.println("  by position: "    + hr.getTeachersByPosition());
+        System.out.printf ("  avg courses: %.2f (expect 1.00)%n", hr.getAvgCoursesPerTeacher());
+        System.out.println("  no-course teachers: " + hr.getTeachersWithNoCourses() + " (expect 0)");
+
+        // ── TEST 9: ReportPeriod factory methods ──────────────────────────────
+        System.out.println("\n--- TEST 9: ReportPeriod factories ---");
+        ReportPeriod spring = ReportPeriod.springSemester(2025);
+        ReportPeriod fall   = ReportPeriod.fallSemester(2025);
+        ReportPeriod year   = ReportPeriod.ofYear(2025);
+        System.out.println("  Spring 2025: " + spring);
+        System.out.println("  Fall   2025: " + fall);
+        System.out.println("  Year   2025: " + year);
+        System.out.println("  allTime contains 1990-01-01: "
+                + allTime.contains(java.time.LocalDate.of(1990, 1, 1)) + " (expect true)");
+        System.out.println("  spring contains 2025-03-15: "
+                + spring.contains(java.time.LocalDate.of(2025, 3, 15)) + " (expect true)");
+        System.out.println("  spring contains 2025-09-01: "
+                + spring.contains(java.time.LocalDate.of(2025, 9, 1)) + " (expect false)");
+
+        // ── TEST 10: coursePerformanceReport — unknown course guard ────────────
+        System.out.println("\n--- TEST 10: coursePerformanceReport unknown course ---");
+        try {
+            reportService.generateCoursePerformanceReport("INVALID999");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 11: studentProgressReport — unknown student guard ─────────────
+        System.out.println("\n--- TEST 11: studentProgressReport unknown student ---");
+        try {
+            reportService.generateStudentProgressReport("S999");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 12: ReportPeriod invalid range guard ──────────────────────────
+        System.out.println("\n--- TEST 12: ReportPeriod invalid range ---");
+        try {
+            new ReportPeriod(
+                    java.time.LocalDate.of(2025, 12, 31),
+                    java.time.LocalDate.of(2025, 1, 1));
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+    }
+
+    private static void runResearchTests() {
+
+        UserRepository            userRepo   = new UserRepository();
+        ResearchPaperRepository   paperRepo  = new ResearchPaperRepository();
+        AuthorshipRepository      authRepo   = new AuthorshipRepository();
+        ResearchService           rs         =
+                new ResearchService(paperRepo, authRepo, userRepo);
+
+        Teacher prof = new Teacher("turing@uni.edu", "Alan", "Turing");
+        prof.setId(1L);
+        prof.setEmployeeId("T001");
+
+        prof.setTeacherPosition(TeacherPosition.PROFESSOR);
+        userRepo.save(prof);
+
+        MasterStudent master = new MasterStudent();
+        master.setId(2L);
+        master.setStudentId("M001");
+        master.setFullName("Grace", "Hopper");
+        master.setEmail("hopper@uni.edu");
+        master.setThesisTopic("Compilers");
+        userRepo.save(master);
+
+        PHDStudent phd = new PHDStudent();
+        phd.setId(3L);
+        phd.setStudentId("P001");
+        phd.setDissertationTopic("Information Theory");
+        phd.setSupervisor(prof);
+        userRepo.save(phd);
+
+        User plainUser = new User("plain@uni.edu", "Plain", "User");
+        plainUser.setId(99L);
+        userRepo.save(plainUser);
+
+        // ── TEST 1: createPaper ───────────────────────────────────────────────
+        System.out.println("--- TEST 1: createPaper ---");
+        ResearchPaper p1 = rs.createPaper(1L, new PaperCreationRequest(
+                "On Computable Numbers",
+                "A foundational paper on computability theory.",
+                PaperType.JOURNAL_ARTICLE,
+                List.of("computability", "Turing machine", "decidability")));
+
+        ResearchPaper p2 = rs.createPaper(2L, new PaperCreationRequest(
+                "A Survey of Compiler Design",
+                "Overview of compiler construction techniques.",
+                PaperType.CONFERENCE_PAPER,
+                List.of("compilers", "parsing", "code generation")));
+
+        ResearchPaper p3 = rs.createPaper(3L, new PaperCreationRequest(
+                "A Mathematical Theory of Communication",
+                "Entropy, information channels, and error correction.",
+                PaperType.JOURNAL_ARTICLE,
+                List.of("information theory", "entropy", "channel capacity")));
+
+        System.out.println("  p1: " + p1);
+        System.out.println("  p2: " + p2);
+        System.out.println("  p3: " + p3);
+
+        // ── TEST 2: auto-registered as first author ───────────────────────────
+        System.out.println("\n--- TEST 2: creator auto-registered as author ---");
+        List<Authorship> p1Authors = rs.getPaperAuthors(p1.getId());
+        System.out.println("  p1 authors: " + p1Authors.size() + " (expect 1)");
+        System.out.println("  " + p1Authors.get(0));
+
+        // ── TEST 3: addAuthor ─────────────────────────────────────────────────
+        System.out.println("\n--- TEST 3: addAuthor ---");
+        rs.addAuthor(p1.getId(), 2L, 2, "Literature review");
+        rs.addAuthor(p1.getId(), 3L, 3, "Proof verification");
+        List<Authorship> p1AuthorsNow = rs.getPaperAuthors(p1.getId());
+        System.out.println("  p1 authors after adds: " + p1AuthorsNow.size() + " (expect 3)");
+        p1AuthorsNow.forEach(a -> System.out.println("  " + a));
+
+        // ── TEST 4: getResearcherPapers ───────────────────────────────────────
+        System.out.println("\n--- TEST 4: getResearcherPapers ---");
+        System.out.println("  Turing's papers: "
+                + rs.getResearcherPapers(1L).size() + " (expect 1)");
+        System.out.println("  Hopper's papers: "
+                + rs.getResearcherPapers(2L).size() + " (expect 2)");
+        System.out.println("  Shannon's papers: "
+                + rs.getResearcherPapers(3L).size() + " (expect 2)");
+
+        // ── TEST 5: submitPaperForReview ──────────────────────────────────────
+        System.out.println("\n--- TEST 5: submitPaperForReview ---");
+        rs.submitPaperForReview(p1.getId());
+        System.out.println("  p1 status: " + p1.getStatus() + " (expect UNDER_REVIEW)");
+
+        // ── TEST 6: publishPaper ──────────────────────────────────────────────
+        System.out.println("\n--- TEST 6: publishPaper ---");
+        rs.publishPaper(p1.getId(), "10.1112/plms/s2-42.1.230", "https://papers.uni.edu/p1.pdf");
+        System.out.println("  p1 status: "  + p1.getStatus()  + " (expect PUBLISHED)");
+        System.out.println("  p1 DOI: "     + p1.getDoi());
+        System.out.println("  p1 fileUrl: " + p1.getFileUrl());
+
+        // ── TEST 7: citePaper ─────────────────────────────────────────────────
+        System.out.println("\n--- TEST 7: citePaper ---");
+        rs.citePaper(p1.getId());
+        rs.citePaper(p1.getId());
+        rs.citePaper(p1.getId());
+        System.out.println("  p1 citations: " + p1.getCitationCount() + " (expect 3)");
+
+        // ── TEST 8: IResearcher.getTotalCitations ─────────────────────────────
+        System.out.println("\n--- TEST 8: getTotalCitations ---");
+        System.out.println("  Turing total citations: "
+                + prof.getTotalCitations() + " (expect 3)");
+        System.out.println("  Hopper total citations: "
+                + master.getTotalCitations() + " (expect 3 — co-author of p1)");
+
+        // ── TEST 9: rejectPaper and resubmit ──────────────────────────────────
+        System.out.println("\n--- TEST 9: rejectPaper + resubmit ---");
+        rs.submitPaperForReview(p2.getId());
+        rs.rejectPaper(p2.getId(), "Insufficient novelty");
+        System.out.println("  p2 status after reject: " + p2.getStatus()
+                + " (expect REJECTED)");
+        rs.submitPaperForReview(p2.getId()); // can re-submit from REJECTED
+        System.out.println("  p2 status after resubmit: " + p2.getStatus()
+                + " (expect UNDER_REVIEW)");
+
+        // ── TEST 10: removeAuthor ─────────────────────────────────────────────
+        System.out.println("\n--- TEST 10: removeAuthor ---");
+        rs.removeAuthor(p1.getId(), 3L); // remove Shannon from p1
+        System.out.println("  p1 authors after remove: "
+                + rs.getPaperAuthors(p1.getId()).size() + " (expect 2)");
+        System.out.println("  Shannon's papers now: "
+                + rs.getResearcherPapers(3L).size() + " (expect 1 — only p3)");
+
+        // ── TEST 11: searchPapers — title query ───────────────────────────────
+        System.out.println("\n--- TEST 11: searchPapers by title ---");
+        List<ResearchPaper> found = rs.searchPapers("theory", null);
+        System.out.println("  'theory' hits: " + found.size() + " (expect 2)");
+        found.forEach(p -> System.out.println("  - " + p.getTitle()));
+
+        // ── TEST 12: searchPapers — filter by type ────────────────────────────
+        System.out.println("\n--- TEST 12: searchPapers filter by JOURNAL_ARTICLE ---");
+        PaperSearchFilters typeFilter = new PaperSearchFilters()
+                .withType(PaperType.JOURNAL_ARTICLE);
+        List<ResearchPaper> journals = rs.searchPapers(null, typeFilter);
+        System.out.println("  Journal articles: " + journals.size() + " (expect 2)");
+
+        // ── TEST 13: searchPapers — filter by status ──────────────────────────
+        System.out.println("\n--- TEST 13: searchPapers filter by PUBLISHED ---");
+        PaperSearchFilters statusFilter = new PaperSearchFilters()
+                .withStatus(ResearchStatus.PUBLISHED);
+        List<ResearchPaper> published = rs.searchPapers(null, statusFilter);
+        System.out.println("  Published papers: " + published.size() + " (expect 1)");
+
+        // ── TEST 14: searchPapers — filter by keyword ─────────────────────────
+        System.out.println("\n--- TEST 14: searchPapers filter by keyword 'entropy' ---");
+        PaperSearchFilters kwFilter = new PaperSearchFilters().withKeyword("entropy");
+        List<ResearchPaper> kwHits = rs.searchPapers(null, kwFilter);
+        System.out.println("  'entropy' keyword hits: " + kwHits.size() + " (expect 1)");
+
+        // ── TEST 15: searchPapers — filter by researcher ──────────────────────
+        System.out.println("\n--- TEST 15: searchPapers filter by researcherId ---");
+        PaperSearchFilters rFilter = new PaperSearchFilters().withResearcherId(2L);
+        List<ResearchPaper> hopperPapers = rs.searchPapers(null, rFilter);
+        System.out.println("  Hopper's papers via filter: " + hopperPapers.size() + " (expect 2)");
+
+        // ── TEST 16: guard — non-researcher cannot create paper ───────────────
+        System.out.println("\n--- TEST 16: non-researcher create guard ---");
+        try {
+            rs.createPaper(99L, new PaperCreationRequest(
+                    "Unauthorized", "", PaperType.PREPRINT, null));
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 17: guard — add author to PUBLISHED paper ────────────────────
+        System.out.println("\n--- TEST 17: addAuthor to PUBLISHED paper guard ---");
+        try {
+            rs.addAuthor(p1.getId(), 3L, 4, "Late addition");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 18: guard — publish without UNDER_REVIEW ─────────────────────
+        System.out.println("\n--- TEST 18: publish DRAFT paper guard ---");
+        try {
+            rs.publishPaper(p3.getId(), "10.0000/test", "https://test.edu/p3.pdf");
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 19: guard — cite non-published paper ─────────────────────────
+        System.out.println("\n--- TEST 19: cite non-published paper guard ---");
+        try {
+            rs.citePaper(p3.getId()); // p3 is still DRAFT
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // ── TEST 20: guard — remove last author ───────────────────────────────
+        System.out.println("\n--- TEST 20: remove last author guard ---");
+        try {
+            rs.removeAuthor(p3.getId(), 3L); // Shannon is the only author of p3
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+    }
     private static int readInt(Scanner scanner) {
         while (!scanner.hasNextInt()) {
             System.out.print("Type a number: ");

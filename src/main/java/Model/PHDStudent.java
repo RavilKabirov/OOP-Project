@@ -1,29 +1,48 @@
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.*;
-import java.util.*;
 
-/**
- * 
- */
-public class PHDStudent extends Student {
+public class PHDStudent extends Student implements IResearcher {
+
+    private final List<ResearchPaper> publications = new ArrayList<>();
     private String dissertationTopic;
     private Teacher supervisor;
 
     public PHDStudent() {}
-    
-    public String getDissertationTopic() {
-    	return  dissertationTopic;
+
+    public String  getDissertationTopic()          { return dissertationTopic; }
+    public void    setDissertationTopic(String v)  { this.dissertationTopic = v; }
+
+    public Teacher getSupervisor()                 { return supervisor; }
+    public void    setSupervisor(Teacher t)        { this.supervisor = t; }
+
+
+    @Override
+    public String getResearcherId() {
+        return getId() != null ? getId().toString() : getStudentId();
     }
-    
-    public void setDissertationTopic(String value) {
-    	this.dissertationTopic=value;
+
+    @Override
+    public List<ResearchPaper> getPublications() {
+        return publications;
     }
-    
-    public Teacher getSupervisor() {
-    	return supervisor;
+
+    @Override
+    public void addPublication(ResearchPaper paper) {
+        if (paper != null && !publications.contains(paper)) {
+            publications.add(paper);
+        }
     }
-    
-    public void setSupervisor(Teacher value) {
-    	this.supervisor=value;
+
+    @Override
+    public void removePublication(Long paperId) {
+        publications.removeIf(p -> p.getId() != null && p.getId().equals(paperId));
+    }
+
+    @Override
+    public String toString() {
+        return "PhDStudent{id=" + getId() + ", name=" + getFullName()
+                + ", topic='" + dissertationTopic
+                + "', publications=" + publications.size() + "}";
     }
 }

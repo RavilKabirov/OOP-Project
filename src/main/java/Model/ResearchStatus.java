@@ -1,10 +1,6 @@
 
-/**
- * 
- */
-public enum PaperStatus {
+public enum ResearchStatus {
     DRAFT,
-    SUBMITTED,
     UNDER_REVIEW,
     PUBLISHED,
     REJECTED

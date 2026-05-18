@@ -14,7 +14,7 @@ public class MarkRepository{
     }
 
     public Optional<Mark> findById(Long a){
-        return findByEnrollment(a);
+        return Optional.of(findByEnrollment(a));
     }
 
     public Mark findByEnrollment(Long a){

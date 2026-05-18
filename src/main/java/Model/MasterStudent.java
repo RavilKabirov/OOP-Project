@@ -1,28 +1,42 @@
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.*;
-import java.util.*;
+public class MasterStudent extends Student implements IResearcher {
 
-/**
- * 
- */
-public class MasterStudent extends Student {
+    private final List<ResearchPaper> publications = new ArrayList<>();
+    private String thesisTopic;
 
-    /**
-     * Default constructor
-     */
-    public MasterStudent() {
+    public MasterStudent() {}
+
+    public String getThesisTopic()           { return thesisTopic; }
+    public void   setThesisTopic(String v)   { this.thesisTopic = v; }
+
+
+    @Override
+    public String getResearcherId() {
+        return getId() != null ? getId().toString() : getStudentId();
     }
 
-    /**
-     * 
-     */
-    private String thesisTitle;
-    
-    public String getTheSisTitle() {
-    	return thesisTitle;
+    @Override
+    public List<ResearchPaper> getPublications() {
+        return publications;
     }
 
-    	public void setTheSisTitle(String value) {
-    		this.thesisTitle=value;
-    	}
+    @Override
+    public void addPublication(ResearchPaper paper) {
+        if (paper != null && !publications.contains(paper)) {
+            publications.add(paper);
+        }
+    }
+
+    @Override
+    public void removePublication(Long paperId) {
+        publications.removeIf(p -> p.getId() != null && p.getId().equals(paperId));
+    }
+
+    @Override
+    public String toString() {
+        return "MasterStudent{id=" + getId() + ", name=" + getFullName()
+                + ", publications=" + publications.size() + "}";
+    }
 }

@@ -1,12 +1,10 @@
 
-/**
- * 
- */
 public enum PaperType {
-    ARTICLE,
-    CONFERENCE,
-    BOOK_CHAPTER,
-    PREPRINT,
+    JOURNAL_ARTICLE,
+    CONFERENCE_PAPER,
     THESIS,
-    PATENT
+    DISSERTATION,
+    BOOK_CHAPTER,
+    TECHNICAL_REPORT,
+    PREPRINT
 }
