@@ -110,7 +110,7 @@ public class CourseService {
         	}
         }
         course.addTeacher(teacher);
-        course.addCourse(course);
+        teacher.addCourse(course);
         
         courseRepository.save(course);
     }
