@@ -28,7 +28,7 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    public Course updateCourse(Long courseId, CourseUpdateRequest courseData) {
+    public Course updateCourse(String courseId, CourseUpdateRequest courseData) {
         Course course = getCourseById(courseId);
         
         if (courseData.getName() != null) {
@@ -44,7 +44,7 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    public void deleteCourse(Long courseId) {
+    public void deleteCourse(String courseId) {
         Course course = getCourseById(courseId);
         List<Enrollment> activeEnrollments = course.getEnrollments();
         
@@ -59,8 +59,8 @@ public class CourseService {
         courseRepository.deleteById(courseId);;
     }
 
-    public Course getCourseById(Long courseId) {
-        return courseRepository.findByCourseId(String.valueOf(courseId))
+    public Course getCourseById(String courseId) {
+        return courseRepository.findByCourseId(courseId)
         		.orElseThrow(() -> new RuntimeException(
         				"Course not found with id: " + courseId
         				));
@@ -69,32 +69,40 @@ public class CourseService {
     public List<Course> searchCourses(CourseSearchFilters filters) {
         List<Course> all = courseRepository.findAll();
         List<Course> result = new ArrayList<>();
-        
+
         for (Course course : all) {
-        	boolean matches = true;
-        	
+            boolean matches = true;
+
             if (filters != null) {
-            	if (filters.getCourseType() != null &&
-            			!filters.getCourseType().equals(course.getCourseType())) {
-            		matches = false;
-            	}
-            	if(filters.getNameKeyword()  != null
-            			&& !filters.getNameKeyword().isEmpty()) {
-            		String lower = filters.getNameKeyword().toLowerCase();
-            		if (course.getName() == null
-            				|| !course.getName().toLowerCase().contains(lower)) {
-            			matches = false;
-            		}
-            	}
-            	if(matches) {
-            		result.add(course);
-            	}
+                if (filters.getCourseType() != null &&
+                        !filters.getCourseType().equals(course.getCourseType())) {
+                    matches = false;
+                }
+
+                if (filters.getNameKeyword() != null &&
+                        !filters.getNameKeyword().isEmpty()) {
+                    String lower = filters.getNameKeyword().toLowerCase();
+                    if (course.getName() == null ||
+                            !course.getName().toLowerCase().contains(lower)) {
+                        matches = false;
+                    }
+                }
+
+                if (filters.getMaxCredits() != null &&
+                        course.getCredits() > filters.getMaxCredits()) {
+                    matches = false;
+                }
+            }
+
+            if (matches) {
+                result.add(course);
             }
         }
+
         return result;
     }
 
-    public void assignInstructor(Long courseId, Long teacherId) {
+    public void assignInstructor(String courseId, Long teacherId) {
         Course course = getCourseById(courseId);
         
         String teacherEmpId = String.valueOf(teacherId);
@@ -110,28 +118,10 @@ public class CourseService {
         	}
         }
         course.addTeacher(teacher);
-        course.addCourse(course);
         
         courseRepository.save(course);
     }
 
-    public List<Course> getCoursesByDepartment(Long departmentId) {
-        List<Teacher> deptTeachers = teacherRepository.findByDepartment(departmentId);
-
-        Set<String> addedIds = new HashSet<>();
-        List<Course> result = new ArrayList<>();
-
-        for (Teacher teacher : deptTeachers) {
-            for (Course c : teacher.getCourses()) {
-                if (!addedIds.contains(c.getCourseId())) {
-                    result.add(c);
-                    addedIds.add(c.getCourseId());
-                }
-            }
-        }
-
-        return result;
-    }
 
     public List<Course> getAvailableCoursesForStudent(Long studentId) {
         List<Course> allCourses = courseRepository.findAll();

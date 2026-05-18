@@ -3,7 +3,6 @@ import java.util.*;
 public class CourseRepository {
 
     private List<Course> courses;
-    private long nextId = 1;
 
     public CourseRepository() {
         this.courses = new ArrayList<>();
@@ -62,9 +61,10 @@ public class CourseRepository {
         return new ArrayList<>(courses);
     }
 
-    public void deleteById(Long id) {
-        if (id != null && id > 0 && id <= courses.size()) {
-            courses.remove(id.intValue() - 1);
+    public void deleteById(String id) {
+        if (id != null) {
+        		Optional<Course> course = findByCourseId(id);
+            course.ifPresent(courses::remove);
         }
     }
 }
