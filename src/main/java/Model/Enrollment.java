@@ -50,7 +50,9 @@ public class Enrollment {
     public void setCourse(Course value) {
         this.course=value;
     }
-
+    public LocalDateTime getEnrollmentDate() { 
+        return enrollmentDate; 
+    }
 
     @Override
     public String toString() {
