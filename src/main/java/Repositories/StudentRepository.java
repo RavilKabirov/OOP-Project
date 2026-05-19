@@ -30,7 +30,15 @@ public class StudentRepository {
         }
         return result;
     }
+    public Optional<Student> findById(Long a){
+    for(Student s:students){
+        if(s.getId()!=null&&s.getId().equals(a)){
+            return Optional.of(s);
+        }
+    }
 
+    return Optional.empty();
+}
     public List<Student> findByYearOfStudy(int year) {
         List<Student> result = new ArrayList<>();
         for (Student s : students) {
