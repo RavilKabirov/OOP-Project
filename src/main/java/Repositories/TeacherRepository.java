@@ -1,7 +1,7 @@
 
 import java.util.*;
 
-public class TeacherRepository {
+public class TeacherRepository implements java.io.Serializable {
 
 
     

@@ -53,6 +53,14 @@ public class AuthContext {
         return currentUser instanceof Manager && !(currentUser instanceof Dean);
     }
 
+    public static boolean isHRManager() {
+        return currentUser instanceof HRManager;
+    }
+
+    public static boolean isPRManager() {
+        return currentUser instanceof PRManager;
+    }
+
     public static boolean isResearcher() {
         return currentUser instanceof IResearcher;
     }
@@ -81,5 +89,17 @@ public class AuthContext {
         if (!(currentUser instanceof IResearcher))
             throw new IllegalStateException("Current user is not a Researcher.");
         return (IResearcher) currentUser;
+    }
+
+    public static HRManager asHRManager() {
+        if (!(currentUser instanceof HRManager))
+            throw new IllegalStateException("Current user is not an HR Manager.");
+        return (HRManager) currentUser;
+    }
+
+    public static PRManager asPRManager() {
+        if (!(currentUser instanceof PRManager))
+            throw new IllegalStateException("Current user is not a PR Manager.");
+        return (PRManager) currentUser;
     }
 }

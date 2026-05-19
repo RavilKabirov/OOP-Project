@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class OrganizationRepository{
+public class OrganizationRepository implements java.io.Serializable{
 
     private List<Organization> organizations;
 

@@ -5,14 +5,24 @@ import java.util.*;
 /**
  * 
  */
-public class Department {
+public class Department implements java.io.Serializable {
     private Long id;
     private String name;
     private String code;
     private Employee head;
     private String email;
-    
-    public Department() {
+    private School faculty;
+    public School getFaculty() {
+		return faculty;
+	}
+
+
+	public void setFaculty(School faculty) {
+		this.faculty = faculty;
+	}
+
+
+	public Department() {
     }
 
 

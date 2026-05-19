@@ -6,8 +6,7 @@ public class TeacherService {
 
     private final TeacherRepository teacherRepository;
     private final DepartmentRepository departmentRepository;
-    public TeacherService(TeacherRepository teacherRepository,
-                          DepartmentRepository departmentRepository) {
+    public TeacherService(TeacherRepository teacherRepository, DepartmentRepository departmentRepository) {
         this.teacherRepository = teacherRepository;
         this.departmentRepository = departmentRepository;
     }
@@ -17,8 +16,7 @@ public class TeacherService {
         if (employeeId == null || employeeId.isBlank()) {
             throw new IllegalArgumentException("Employee ID cannot be null or blank");
         }
-        return teacherRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() -> new NoSuchElementException("Teacher not found with employeeId: " + employeeId));
+        return teacherRepository.findByEmployeeId(employeeId).orElseThrow(() -> new NoSuchElementException("Teacher not found with employeeId: " + employeeId));
     }
 
     public Teacher updateTeacherProfile(String employeeId, TeacherProfileUpdateRequest profileData) {
@@ -63,8 +61,7 @@ public class TeacherService {
         if (deptId == null) {
             throw new IllegalArgumentException("Department ID cannot be null");
         }
-        departmentRepository.findById(deptId)
-                .orElseThrow(() -> new NoSuchElementException("Department not found with ID: " + deptId));
+        departmentRepository.findById(deptId).orElseThrow(() -> new NoSuchElementException("Department not found with ID: " + deptId));
         return teacherRepository.findByDepartment(deptId);
     }
 
@@ -77,8 +74,7 @@ public class TeacherService {
         }
 
         Teacher teacher = getTeacherByEmployeeId(teacherId);
-        Department department = departmentRepository.findById(deptId)
-                .orElseThrow(() -> new NoSuchElementException("Department not found with ID: " + deptId));
+        Department department = departmentRepository.findById(deptId).orElseThrow(() -> new NoSuchElementException("Department not found with ID: " + deptId));
 
         teacher.setDepartment(department);
         teacherRepository.save(teacher);
@@ -89,16 +85,11 @@ public class TeacherService {
             return teacherRepository.findAll();
         }
         String lowerKeyword = keyword.toLowerCase();
-        return teacherRepository.findAll().stream()
-                .filter(t -> matchesKeyword(t, lowerKeyword))
-                .collect(Collectors.toList());
+        return teacherRepository.findAll().stream().filter(t -> matchesKeyword(t, lowerKeyword)).collect(Collectors.toList());
     }
 
     private boolean matchesKeyword(Teacher teacher, String lowerKeyword) {
-        return (teacher.getFirstName() != null && teacher.getFirstName().toLowerCase().contains(lowerKeyword))
-                || (teacher.getLastName() != null && teacher.getLastName().toLowerCase().contains(lowerKeyword))
-                || (teacher.getEmail() != null && teacher.getEmail().toLowerCase().contains(lowerKeyword))
-                || (teacher.getEmployeeId() != null && teacher.getEmployeeId().toLowerCase().contains(lowerKeyword));
+        return (teacher.getFirstName() != null && teacher.getFirstName().toLowerCase().contains(lowerKeyword)) || (teacher.getLastName() != null && teacher.getLastName().toLowerCase().contains(lowerKeyword)) || (teacher.getEmail() != null && teacher.getEmail().toLowerCase().contains(lowerKeyword)) || (teacher.getEmployeeId() != null && teacher.getEmployeeId().toLowerCase().contains(lowerKeyword));
     }
 
 

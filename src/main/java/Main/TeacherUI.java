@@ -16,10 +16,16 @@ public class TeacherUI {
 
     private final ApplicationContext ctx;
     private final Scanner sc;
+    private final ResearcherUI researcherUI;
+    private final WorkloadUI workloadUI;
+    private final MessageCenterUI messageCenterUI;
 
     public TeacherUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
         this.sc = sc;
+        this.researcherUI = new ResearcherUI(ctx, sc);
+        this.workloadUI = new WorkloadUI(ctx, sc);
+        this.messageCenterUI = new MessageCenterUI(ctx, sc);
     }
 
     public void run() {
@@ -33,17 +39,19 @@ public class TeacherUI {
             System.out.println("  3. Complaints");
             System.out.println("  4. Messages");
             System.out.println("  5. Research");
-            System.out.println("  6. Profile");
+            System.out.println("  6. Workload");
+            System.out.println("  7. Profile");
             System.out.println("  0. Log out");
 
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 6);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 7);
             switch (choice) {
                 case 1: showMyCourses(teacher); break;
                 case 2: showAssignGrade(teacher);break;
                 case 3: showComplaints(teacher); break;
-                case 4: showMessages(teacher); break;
-                case 5: showResearch(teacher); break;
-                case 6: showProfile(teacher); break;
+                case 4: messageCenterUI.runForEmployee(teacher); break;
+                case 5: researcherUI.run(); break;
+                case 6: workloadUI.showCurrentTeacherWorkload(teacher); break;
+                case 7: showProfileMenu(teacher); break;
                 case 0: running = false; break;
             }
         }
@@ -209,13 +217,21 @@ public class TeacherUI {
         ConsoleUtils.pressEnterToContinue(sc);
     }
 
-    private void showResearch(Teacher teacher) {
-        ConsoleUtils.printHeader("Research");
-        var papers = ctx.getResearchService().getResearcherPapers(teacher.getId());
-        if (papers.isEmpty()) { System.out.println("  No publications yet."); }
-        else papers.forEach(p -> System.out.println("  " + p));
-        System.out.printf("  Total citations: %d%n", teacher.getTotalCitations());
-        ConsoleUtils.pressEnterToContinue(sc);
+    private void showProfileMenu(Teacher teacher) {
+        boolean running = true;
+        while (running) {
+            ConsoleUtils.printHeader("Profile");
+            System.out.println("  1. View profile");
+            System.out.println("  2. Update profile");
+            System.out.println("  0. Back");
+
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 2);
+            switch (choice) {
+                case 1: showProfile(teacher); break;
+                case 2: updateProfile(teacher); break;
+                case 0: running = false; break;
+            }
+        }
     }
 
     private void showProfile(Teacher teacher) {
@@ -226,6 +242,26 @@ public class TeacherUI {
         System.out.println("  Position:   " + teacher.getTeacherPosition());
         System.out.println("  Department: " + (teacher.getDepartment() != null ? teacher.getDepartment().getName() : "—"));
         System.out.println("  Courses:    " + teacher.getCourses().size());
+        ConsoleUtils.pressEnterToContinue(sc);
+    }
+
+    private void updateProfile(Teacher teacher) {
+        ConsoleUtils.printHeader("Update Profile");
+        try {
+            String firstName = ConsoleUtils.readLine(sc, "  First name (optional): ");
+            String lastName = ConsoleUtils.readLine(sc, "  Last name (optional): ");
+            String email = ConsoleUtils.readLine(sc, "  Email (optional): ");
+            ctx.getTeacherService().updateTeacherProfile(
+                    teacher.getEmployeeId(),
+                    new TeacherProfileUpdateRequest(
+                            firstName.isBlank() ? null : firstName,
+                            lastName.isBlank() ? null : lastName,
+                            email.isBlank() ? null : email,
+                            null));
+            ConsoleUtils.printSuccess("Profile updated.");
+        } catch (Exception ex) {
+            ConsoleUtils.printError(ex.getMessage());
+        }
         ConsoleUtils.pressEnterToContinue(sc);
     }
 }

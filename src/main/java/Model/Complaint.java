@@ -1,7 +1,7 @@
 import java.util.*;
 import java.time.*;
 
-public class Complaint{
+public class Complaint implements java.io.Serializable{
     private Long id;
     private Teacher sender;
     private ManagerForComplaint recipient;

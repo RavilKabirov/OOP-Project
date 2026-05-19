@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.time.*;
 
-public class Organization{
+public class Organization implements java.io.Serializable{
 
     private Long id;
     private String name;

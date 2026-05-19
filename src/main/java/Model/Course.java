@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Course{
+public class Course implements java.io.Serializable{
     private String courseId;
     private String name;
     private int credits;

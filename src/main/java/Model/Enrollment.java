@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.time.LocalDateTime;
 
-public class Enrollment {
+public class Enrollment implements java.io.Serializable {
 
     private Long id;
     private Student student;

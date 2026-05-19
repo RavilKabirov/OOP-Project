@@ -1,12 +1,12 @@
 import java.io.*;
 import java.util.*;
 
-public class NewsRepository {
+public class NewsRepository implements java.io.Serializable {
     public List<News> newsList;
     private long nextId = 1;
     
     public NewsRepository() {
-    	this.newsList = new ArrayList();
+    	this.newsList = new ArrayList<>();
     }
 
     public News save(News news) {
@@ -36,7 +36,7 @@ public class NewsRepository {
     }
 
     public List<News> findByAuthorId(Long authorId){
-    	List<News> result = new ArrayList();
+    	List<News> result = new ArrayList<>();
     	for (News n : newsList) {
     		if (n.getAuthorId() != null && n.getAuthorId().equals(authorId)) {
     			result.add(n);

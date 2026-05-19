@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class ResearchPaperRepository {
+public class ResearchPaperRepository implements java.io.Serializable {
 
     private final List<ResearchPaper> papers;
     private long nextId = 1;

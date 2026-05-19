@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class AuthorshipRepository {
+public class AuthorshipRepository implements java.io.Serializable {
 
     private final List<Authorship> authorships;
 
@@ -39,15 +39,10 @@ public class AuthorshipRepository {
     }
 
     public Optional<Authorship> findByPaperAndResearcher(Long paperId, Long researcherId) {
-        return authorships.stream()
-                .filter(a -> a.getPaperId().equals(paperId)
-                          && a.getResearcherId().equals(researcherId))
-                .findFirst();
+        return authorships.stream().filter(a -> a.getPaperId().equals(paperId) && a.getResearcherId().equals(researcherId)) .findFirst();
     }
 
-    public void deleteByPaperAndResearcher(Long paperId, Long researcherId) {
-        authorships.removeIf(a -> a.getPaperId().equals(paperId)
-                                && a.getResearcherId().equals(researcherId));
+    public void deleteByPaperAndResearcher(Long paperId, Long researcherId) { authorships.removeIf(a -> a.getPaperId().equals(paperId) && a.getResearcherId().equals(researcherId));
     }
 
     public void deleteAllByPaperId(Long paperId) {

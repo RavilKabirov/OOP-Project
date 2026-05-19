@@ -4,7 +4,7 @@
  * Stores the researcher's role (order of authorship, contribution description)
  * on a specific paper.
  */
-public class Authorship {
+public class Authorship implements java.io.Serializable {
 
     private Long   paperId;
     private Long   researcherId;   // User.getId() of the researcher

@@ -1,5 +1,5 @@
 import java.util.*;
-public class MessageRepository {
+public class MessageRepository implements java.io.Serializable {
 
     private final List<Message> messages;
     private long nextId = 1;

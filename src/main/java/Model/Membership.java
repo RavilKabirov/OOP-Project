@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Membership{
+public class Membership implements java.io.Serializable{
     private Long id;
     private Student student;
     private Organization organization;

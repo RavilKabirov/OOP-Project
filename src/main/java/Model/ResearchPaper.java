@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.time.LocalDateTime;
 
-public class ResearchPaper {
+public class ResearchPaper implements java.io.Serializable {
 
     private Long          id;
     private String        title;

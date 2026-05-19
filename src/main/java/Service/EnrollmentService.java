@@ -24,6 +24,7 @@ public class EnrollmentService {
         Optional<Enrollment> existing = enrollmentRepository.findByStudentAndCourse(studentId, course);
         if (existing.isPresent()) {
             EnrollmentStatus s = existing.get().getStatus();
+            // Если запись уже ACTIVE или PENDING, второй раз на тот же курс записывать нельзя.
             if (s == EnrollmentStatus.ACTIVE || s == EnrollmentStatus.PENDING) {
                 throw new IllegalStateException("Student " + studentId + " is already enrolled in " + courseId);
             }
@@ -52,6 +53,7 @@ public class EnrollmentService {
                         "No active enrollment found for student " + studentId + " in course " + courseId));
 
         if (enrollment.getStatus() == EnrollmentStatus.REJECTED) {
+            // REJECTED тут используется как dropped, поэтому повторно drop делать смысла нет.
             throw new IllegalStateException("Enrollment is already dropped.");
         }
 
@@ -83,6 +85,7 @@ public class EnrollmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found: " + enrollmentId));
 
         if (enrollment.getStatus() != EnrollmentStatus.ACTIVE) {
+            // Завершать можно только активную запись, чтобы не менять уже закрытые/отклоненные enrollments.
             throw new IllegalStateException("Can only complete an ACTIVE enrollment.");
         }
 

@@ -13,9 +13,13 @@ import java.util.Scanner;
 public class StudentUI {
     private final ApplicationContext ctx;
     private final Scanner sc;
+    private final ResearcherUI researcherUI;
+    private final OrganizationUI organizationUI;
     public StudentUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
         this.sc  = sc;
+        this.researcherUI = new ResearcherUI(ctx, sc);
+        this.organizationUI = new OrganizationUI(ctx, sc);
     }
 
     public void run() {
@@ -27,13 +31,15 @@ public class StudentUI {
             System.out.println("  1. My courses");
             System.out.println("  2. My grades");
             System.out.println("  3. My transcript");
+            System.out.println("  4. Course registration");
+            System.out.println("  5. Organizations");
             if (AuthContext.isResearcher()) {
-                System.out.println("  4. Research");
+                System.out.println("  6. Research");
             }
-            System.out.println("  5. Profile");
+            System.out.println("  " + (AuthContext.isResearcher() ? "7" : "6") + ". Profile");
             System.out.println("  0. Log out");
 
-            int max = AuthContext.isResearcher() ? 5 : 5;
+            int max = AuthContext.isResearcher() ? 7 : 6;
             int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, max);
 
             switch (choice) {
@@ -41,10 +47,17 @@ public class StudentUI {
                 case 2: showMyGrades(student);     break;
                 case 3: showMyTranscript(student); break;
                 case 4:
-                    if (AuthContext.isResearcher()) showResearch();
-                    else ConsoleUtils.printError("Invalid option.");
+                    showCourseRegistration(student);
                     break;
-                case 5: showProfile(student);      break;
+                case 5:
+                    organizationUI.runForStudent(student);
+                    break;
+                case 6:
+                    // У обычного bachelor тут сразу Profile, а у Master/PhD сначала Research.
+                    if (AuthContext.isResearcher()) researcherUI.run();
+                    else showProfile(student);
+                    break;
+                case 7: showProfile(student);      break;
                 case 0: running = false;           break;
             }
         }
@@ -91,20 +104,70 @@ public class StudentUI {
         ConsoleUtils.pressEnterToContinue(sc);
     }
 
-    private void showResearch() {
-        ConsoleUtils.printHeader("My Research");
-        IResearcher researcher = AuthContext.asResearcher();
-        var papers = ctx.getResearchService()
-                .getResearcherPapers(AuthContext.getCurrentUser().getId());
-        if (papers.isEmpty()) {
-            System.out.println("  No publications yet.");
-        } else {
-            papers.forEach(p -> System.out.println("  " + p));
+    private void showCourseRegistration(Student student) {
+        boolean running = true;
+        while (running) {
+            ConsoleUtils.printHeader("Course Registration");
+            System.out.println("  1. Available courses");
+            System.out.println("  2. Enroll in course");
+            System.out.println("  3. Drop course");
+            System.out.println("  4. Check enrollment status");
+            System.out.println("  0. Back");
+
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 4);
+            switch (choice) {
+                case 1: showAvailableCourses(student); break;
+                case 2: enrollInCourse(student); break;
+                case 3: dropCourse(student); break;
+                case 4: showEnrollmentStatus(student); break;
+                case 0: running = false; break;
+            }
         }
-        System.out.printf("  Total citations: %d%n", researcher.getTotalCitations());
+    }
+
+    private void showAvailableCourses(Student student) {
+        ConsoleUtils.printHeader("Available Courses");
+        var courses = ctx.getCourseService().getAvailableCoursesForStudent(student.getId());
+        if (courses.isEmpty()) {
+            System.out.println("  No available courses.");
+        } else {
+            courses.forEach(c -> System.out.printf("  [%s] %-30s credits=%d type=%s%n",
+                    c.getCourseId(), c.getName(), c.getCredits(), c.getCourseType()));
+        }
         ConsoleUtils.pressEnterToContinue(sc);
     }
 
+    private void enrollInCourse(Student student) {
+        ConsoleUtils.printHeader("Enroll In Course");
+        try {
+            String courseId = ConsoleUtils.readNonBlank(sc, "  Course ID: ");
+            Enrollment enrollment = ctx.getEnrollmentService().enrollStudent(student.getStudentId(), courseId);
+            ConsoleUtils.printSuccess("Enrollment #" + enrollment.getId() + " created.");
+        } catch (Exception ex) {
+            ConsoleUtils.printError(ex.getMessage());
+        }
+        ConsoleUtils.pressEnterToContinue(sc);
+    }
+
+    private void dropCourse(Student student) {
+        ConsoleUtils.printHeader("Drop Course");
+        try {
+            String courseId = ConsoleUtils.readNonBlank(sc, "  Course ID: ");
+            ctx.getEnrollmentService().dropCourse(student.getStudentId(), courseId);
+            ConsoleUtils.printSuccess("Course dropped.");
+        } catch (Exception ex) {
+            ConsoleUtils.printError(ex.getMessage());
+        }
+        ConsoleUtils.pressEnterToContinue(sc);
+    }
+
+    private void showEnrollmentStatus(Student student) {
+        ConsoleUtils.printHeader("Enrollment Status");
+        String courseId = ConsoleUtils.readNonBlank(sc, "  Course ID: ");
+        System.out.println("  Status: " + ctx.getEnrollmentService()
+                .getEnrollmentStatus(student.getStudentId(), courseId));
+        ConsoleUtils.pressEnterToContinue(sc);
+    }
 
     private void showProfile(Student student) {
         ConsoleUtils.printHeader("Profile");

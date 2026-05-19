@@ -11,13 +11,11 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public void blockUser(Long userId) {
@@ -69,10 +67,7 @@ public class UserService {
             throw new RuntimeException("Email already exists");
         }
 
-        User user = new User(
-                userData.getEmail(),
-                userData.getFirstName(),
-                userData.getLastName()
+        User user = new User( userData.getEmail(), userData.getFirstName(), userData.getLastName()
         );
         PasswordEncoder pe = new PasswordEncoder();
 

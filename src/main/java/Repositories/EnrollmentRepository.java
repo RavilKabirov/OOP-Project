@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class EnrollmentRepository {
+public class EnrollmentRepository implements java.io.Serializable {
 
     private List<Enrollment> enrollments;
     private long nextId = 1;

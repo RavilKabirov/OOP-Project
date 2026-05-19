@@ -1,7 +1,7 @@
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class User {
+public class User implements java.io.Serializable {
     private Long Id;
     private String firstName;
     private String lastName;

@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class MembershipRepository{
+public class MembershipRepository implements java.io.Serializable{
 
     private List<Membership> memberships;
 
@@ -60,12 +60,12 @@ public class MembershipRepository{
         return result;
     }
 
-    public boolean existsByStudentIdAndOrganizationId(Long a,Long b){
+    public boolean existsByStudentIdAndOrganizationId(String a,Long b){
         for(Membership m:memberships){
             if(m.getStudent()!=null&&m.getOrganization()!=null
                     &&m.getStudent().getId()!=null
                     &&m.getOrganization().getId()!=null
-                    &&m.getStudent().getId().equals(a)
+                    &&m.getStudent().getStudentId().equals(a)
                     &&m.getOrganization().getId().equals(b)
                     &&m.getStatus()==MembershipStatus.ACTIVE){
                 return true;

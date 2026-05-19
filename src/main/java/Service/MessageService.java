@@ -18,6 +18,7 @@ public class MessageService {
             throw new IllegalArgumentException("Message body must not be blank.");
         }
         if (senderId.equals(recipientId)) {
+            // Самому себе message не отправляем, так inbox/sent не путаются.
             throw new IllegalStateException("An employee cannot message themselves.");
         }
 
@@ -47,6 +48,7 @@ public class MessageService {
         requireEmployee(employeeId, "Employee");
         Message message = requireMessage(messageId);
         if (!message.getRecipientId().equals(employeeId)) {
+            // Read может ставить только получатель, sender не должен читать за другого.
             throw new IllegalArgumentException(
                     "Employee " + employeeId + " is not the recipient of message #" + messageId);
         }
@@ -62,6 +64,7 @@ public class MessageService {
         boolean isRecipient = message.getRecipientId().equals(employeeId);
 
         if (!isSender && !isRecipient) {
+            // Удалять message может только тот, кто участвовал в переписке.
             throw new IllegalArgumentException(
                     "Employee " + employeeId + " has no access to message #" + messageId);
         }

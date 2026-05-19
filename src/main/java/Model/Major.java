@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Major {
+public class Major implements java.io.Serializable {
 
     private Long id;
     private String majorId;

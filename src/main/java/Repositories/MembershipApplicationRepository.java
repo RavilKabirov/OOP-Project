@@ -1,7 +1,6 @@
-import java.io.*;
 import java.util.*;
 
-public class MembershipApplicationRepository{
+public class MembershipApplicationRepository implements java.io.Serializable{
 
     private List<MembershipApplication> applications;
 

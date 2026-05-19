@@ -7,6 +7,10 @@ import java.util.*;
 public abstract class Employee extends User {
     private String employeeId;
     private Department department;
+
+    public Employee() {
+        super();
+    }
     
     public Employee(String email, String firstName, String lastName) {
         super(email, firstName, lastName);

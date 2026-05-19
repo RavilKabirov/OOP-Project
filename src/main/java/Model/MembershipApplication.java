@@ -1,7 +1,7 @@
 import java.util.*;
 import java.time.*;
 
-public class MembershipApplication{
+public class MembershipApplication implements java.io.Serializable{
     private Long id;
     private Student student;
     private Organization organization;
@@ -30,8 +30,40 @@ public class MembershipApplication{
     public void setSubmittedAt(LocalDateTime a){
         submittedAt=a;
     }
+    
+    public Long getId() {
+		return id;
+	}
 
-    public String toString(){
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Student getStudent() {
+		return student;
+	}
+
+	public void setStudent(Student student) {
+		this.student = student;
+	}
+
+	public Organization getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(Organization organization) {
+		this.organization = organization;
+	}
+
+	public String getBody() {
+		return body;
+	}
+
+	public void setBody(String body) {
+		this.body = body;
+	}
+
+	public String toString(){
         return student+" "+applicationStatus;
     }
 }

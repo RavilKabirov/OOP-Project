@@ -7,12 +7,10 @@ public class TranscriptService {
     private final MarkRepository       markRepository;
     private final StudentRepository    studentRepository;
 
-    public TranscriptService(EnrollmentRepository enrollmentRepository,
-                             MarkRepository markRepository,
-                             StudentRepository studentRepository) {
+    public TranscriptService(EnrollmentRepository enrollmentRepository, MarkRepository markRepository, StudentRepository studentRepository) {
         this.enrollmentRepository = enrollmentRepository;
-        this.markRepository       = markRepository;
-        this.studentRepository    = studentRepository;
+        this.markRepository = markRepository;
+        this.studentRepository = studentRepository;
     }
 
     public Transcript generateTranscript(String studentId) {
@@ -20,8 +18,7 @@ public class TranscriptService {
 
         Transcript transcript = new Transcript(student);
 
-        List<Enrollment> allEnrollments =
-                enrollmentRepository.findByStudent(student.getStudentId());
+        List<Enrollment> allEnrollments = enrollmentRepository.findByStudent(student.getStudentId());
 
         for (Enrollment enrollment : allEnrollments) {
 
@@ -34,10 +31,7 @@ public class TranscriptService {
             transcript.addEnrollment(enrollment);
         }
 
-        System.out.println("[TranscriptService] Generated transcript for "
-                + student.getFullName()
-                + " — " + allEnrollments.size() + " enrollment(s), GPA="
-                + String.format("%.2f", transcript.calculateGPA()));
+        System.out.println("[TranscriptService] Generated transcript for " + student.getFullName() + " — " + allEnrollments.size() + " enrollment(s), GPA=" + String.format("%.2f", transcript.calculateGPA()));
 
         return transcript;
     }
@@ -51,8 +45,7 @@ public class TranscriptService {
             }
         }
 
-        System.out.println("[TranscriptService] " + student.getFullName()
-                + " has " + completed.size() + " completed course(s).");
+        System.out.println("[TranscriptService] " + student.getFullName() + " has " + completed.size() + " completed course(s).");
         return completed;
     }
 
@@ -60,8 +53,7 @@ public class TranscriptService {
     public double calculateGPA(String studentId) {
         Transcript transcript = generateTranscript(studentId);
         double gpa = transcript.calculateGPA();
-        System.out.printf("[TranscriptService] GPA for student '%s': %.2f%n",
-                studentId, gpa);
+        System.out.printf("[TranscriptService] GPA for student '%s': %.2f%n", studentId, gpa);
         return gpa;
     }
 
@@ -81,8 +73,6 @@ public class TranscriptService {
     }
 
     private Student requireStudent(String studentId) {
-        return studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Student not found with studentId: " + studentId));
+        return studentRepository.findByStudentId(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found with studentId: " + studentId));
     }
 }

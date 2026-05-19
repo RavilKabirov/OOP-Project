@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * 
  */
-public class School {
+public class School implements java.io.Serializable {
     private Long id;
     private String name;
     private Dean dean;

@@ -10,9 +10,14 @@ public abstract class Manager extends Employee {
     private ManagerLevel level = ManagerLevel.DEPARTMENT;
     private LocalDateTime appointedAt;
     
+    public Manager() {
+        super();
+        this.appointedAt = LocalDateTime.now();
+    }
     
     public Manager(String email, String firstName, String lastName) {
     	super(email, firstName, lastName);
+        this.appointedAt = LocalDateTime.now();
     }
 
     /**

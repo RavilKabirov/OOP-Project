@@ -1,7 +1,7 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class News {
+public class News implements java.io.Serializable {
 
     private Long id;
     private String title;

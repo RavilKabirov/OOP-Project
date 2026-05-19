@@ -15,10 +15,12 @@ public class DeanUI {
 
     private final ApplicationContext ctx;
     private final Scanner sc;
+    private final MessageCenterUI messageCenterUI;
 
     public DeanUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
         this.sc = sc;
+        this.messageCenterUI = new MessageCenterUI(ctx, sc);
     }
 
     public void run() {
@@ -39,7 +41,7 @@ public class DeanUI {
                 case 1: showFacultyOverview(dean); break;
                 case 2: showComplaints();          break;
                 case 3: showReports(dean);         break;
-                case 4: showMessages(dean);        break;
+                case 4: messageCenterUI.runForEmployee(dean); break;
                 case 5: showProfile(dean);         break;
                 case 0: running = false;           break;
             }

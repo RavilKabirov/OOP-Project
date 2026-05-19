@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class MarkRepository{
+public class MarkRepository implements java.io.Serializable{
     private List<Mark> marks;
 
     public MarkRepository(){

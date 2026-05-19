@@ -1,7 +1,7 @@
 import java.util.*;
 
 
-public class FacultyRepository {
+public class FacultyRepository implements java.io.Serializable {
 
     private final List<School>                  schools;
     private final Map<Long, List<Department>>   schoolDepartments;

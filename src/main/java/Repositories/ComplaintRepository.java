@@ -1,7 +1,7 @@
 import java.util.*;
 
 
-public class ComplaintRepository {
+public class ComplaintRepository implements java.io.Serializable {
 
     public List<Complaint> complaints;
     private long nextId = 1;
@@ -27,18 +27,14 @@ public class ComplaintRepository {
     }
 
     public Optional<Complaint> findById(Long id) {
-        return complaints.stream()
-                .filter(c -> c.getId() != null && c.getId().equals(id))
-                .findFirst();
+        return complaints.stream().filter(c -> c.getId() != null && c.getId().equals(id)).findFirst();
     }
 
 
     public List<Complaint> findBySender(Long teacherId) {
         List<Complaint> result = new ArrayList<>();
         for (Complaint c : complaints) {
-            if (c.getSender() != null
-                    && c.getSender().getId() != null
-                    && c.getSender().getId().equals(teacherId)) {
+            if (c.getSender() != null && c.getSender().getId() != null && c.getSender().getId().equals(teacherId)) {
                 result.add(c);
             }
         }
@@ -58,8 +54,7 @@ public class ComplaintRepository {
     public List<Complaint> findByTargetStudentId(String studentId) {
         List<Complaint> result = new ArrayList<>();
         for (Complaint c : complaints) {
-            if (c.getTargetStudent() != null
-                    && studentId.equals(c.getTargetStudent().getStudentId())) {
+            if (c.getTargetStudent() != null&& studentId.equals(c.getTargetStudent().getStudentId())) {
                 result.add(c);
             }
         }

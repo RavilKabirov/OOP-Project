@@ -42,6 +42,7 @@ public class ComplaintService {
         Complaint complaint = requireComplaint(complaintId);
 
         if (complaint.getComplaintStatus() != ComplaintStatus.SUBMITTED) {
+            // На review можно брать только новую complaint, иначе статусы будут прыгать назад.
             throw new IllegalStateException(
                     "Complaint #" + complaintId + " is not SUBMITTED (current: "
                     + complaint.getComplaintStatus() + ").");
@@ -58,6 +59,7 @@ public class ComplaintService {
         Complaint complaint = requireComplaint(complaintId);
 
         if (complaint.getComplaintStatus() != ComplaintStatus.UNDER_REVIEW) {
+            // Resolve делаем только после review, чтобы complaint прошла нормальный workflow.
             throw new IllegalStateException(
                     "Complaint #" + complaintId + " must be UNDER_REVIEW to resolve "
                     + "(current: " + complaint.getComplaintStatus() + ").");
@@ -75,6 +77,7 @@ public class ComplaintService {
 
         ComplaintStatus current = complaint.getComplaintStatus();
         if (current == ComplaintStatus.RESOLVED || current == ComplaintStatus.REJECTED) {
+            // Закрытые complaints уже не меняем.
             throw new IllegalStateException(
                     "Complaint #" + complaintId + " is already " + current + ".");
         }
@@ -91,6 +94,7 @@ public class ComplaintService {
 
         ComplaintStatus status = complaint.getComplaintStatus();
         if (status != ComplaintStatus.RESOLVED && status != ComplaintStatus.REJECTED) {
+            // Удалять можно только закрытые complaints, активные надо сначала resolve/reject.
             throw new IllegalStateException(
                     "Cannot delete complaint #" + complaintId
                     + " while it is still " + status + ".");

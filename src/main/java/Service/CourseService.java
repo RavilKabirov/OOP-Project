@@ -15,9 +15,7 @@ public class CourseService {
     
     public Course createCourse(CourseCreationRequest courseData) {
     	if (courseRepository.findByCourseId(courseData.getCourseId()).isPresent()) {
-    		throw new RuntimeException(
-    				"Course with id '" + courseData.getCourseId() + "' already exists"
-    				);
+    		throw new RuntimeException("Course with id '" + courseData.getCourseId() + "' already exists");
     	}
     	Course course = new Course();
     	course.setCourseId(courseData.getCourseId());
@@ -48,11 +46,10 @@ public class CourseService {
         Course course = getCourseById(courseId);
         List<Enrollment> activeEnrollments = course.getEnrollments();
         
+        // Перед удалением курса надо убрать все enrollments, иначе у студентов останется ссылка на несуществующий курс.
         if (activeEnrollments != null && !activeEnrollments.isEmpty()) {
         	throw new RuntimeException(
-        			"Can not delete course '" + course.getName() +
-        			"': " + activeEnrollments.size() + " enrollment(s) exist. "
-        					+ "Remove enrollments first."
+        			"Can not delete course '" + course.getName() + "': " + activeEnrollments.size() + " enrollment(s) exist. " 		+ "Remove enrollments first."
         			);
         	
         }
@@ -60,10 +57,7 @@ public class CourseService {
     }
 
     public Course getCourseById(String courseId) {
-        return courseRepository.findByCourseId(courseId)
-        		.orElseThrow(() -> new RuntimeException(
-        				"Course not found with id: " + courseId
-        				));
+        return courseRepository.findByCourseId(courseId).orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
     }
 
     public List<Course> searchCourses(CourseSearchFilters filters) {
@@ -74,22 +68,18 @@ public class CourseService {
             boolean matches = true;
 
             if (filters != null) {
-                if (filters.getCourseType() != null &&
-                        !filters.getCourseType().equals(course.getCourseType())) {
+                if (filters.getCourseType() != null && !filters.getCourseType().equals(course.getCourseType())) {
                     matches = false;
                 }
 
-                if (filters.getNameKeyword() != null &&
-                        !filters.getNameKeyword().isEmpty()) {
+                if (filters.getNameKeyword() != null && !filters.getNameKeyword().isEmpty()) {
                     String lower = filters.getNameKeyword().toLowerCase();
-                    if (course.getName() == null ||
-                            !course.getName().toLowerCase().contains(lower)) {
+                    if (course.getName() == null || !course.getName().toLowerCase().contains(lower)) {
                         matches = false;
                     }
                 }
 
-                if (filters.getMaxCredits() != null &&
-                        course.getCredits() > filters.getMaxCredits()) {
+                if (filters.getMaxCredits() != null && course.getCredits() > filters.getMaxCredits()) {
                     matches = false;
                 }
             }
@@ -105,19 +95,14 @@ public class CourseService {
     public void assignInstructor(String courseId, Long teacherId) {
         Course course = getCourseById(courseId);
         
-        String teacherEmpId = String.valueOf(teacherId);
-        Teacher teacher = teacherRepository.findByEmployeeId(teacherEmpId)
-        		.orElseThrow(() -> new RuntimeException(
-        				"Teacher not found with employeeId: " + teacherEmpId
-        				));
+        Teacher teacher = teacherRepository.findAll().stream().filter(t -> t.getId() != null && t.getId().equals(teacherId)).findFirst().orElseThrow(() -> new RuntimeException("Teacher not found with id: " + teacherId));
         for (Teacher t : course.getTeachers()) {
-        	if (teacherEmpId.equals(t.getEmployeeId())) {
-        		throw new RuntimeException(
-        				"Teacher is already assigned to this course"
-        				);
+        	// Один и тот же teacher не должен появляться в списке instructors два раза.
+        	if (teacherId.equals(t.getId())) {throw new RuntimeException("Teacher is already assigned to this course");
         	}
         }
         course.addTeacher(teacher);
+        teacher.addCourse(course);
         
         courseRepository.save(course);
     }
@@ -132,8 +117,8 @@ public class CourseService {
             boolean alreadyEnrolled = false;
 
             for (Enrollment e : course.getEnrollments()) {
-                if (e.getStudent() != null &&
-                        studentIdStr.equals(e.getStudent().getStudentId())) {
+                // Не показываем курс как доступный, если студент уже записан на него.
+                if (e.getStudent() != null &&((e.getStudent().getId() != null && e.getStudent().getId().equals(studentId))|| studentIdStr.equals(e.getStudent().getStudentId()))) {
                     alreadyEnrolled = true;
                     break;
                 }

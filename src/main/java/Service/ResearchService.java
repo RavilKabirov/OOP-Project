@@ -46,10 +46,12 @@ public class ResearchService {
         ResearchPaper paper     = requirePaper(paperId);
         IResearcher   researcher = requireResearcher(researcherId);
 
+        // Авторов можно менять только пока paper еще черновик или rejected.
         requireEditable(paper);
 
         if (authorshipRepository.findByPaperAndResearcher(
                 paperId, researcherId).isPresent()) {
+            // Один researcher не может быть автором одной статьи два раза.
             throw new IllegalArgumentException(
                     "Researcher " + researcherId
                     + " is already an author of paper #" + paperId);
@@ -75,6 +77,7 @@ public class ResearchService {
 
         List<Authorship> current = authorshipRepository.findByPaperId(paperId);
         if (current.size() <= 1) {
+            // У paper всегда должен остаться хотя бы один author.
             throw new IllegalStateException(
                     "Cannot remove the only author from paper #" + paperId);
         }
@@ -91,6 +94,7 @@ public class ResearchService {
 
         if (paper.getStatus() != ResearchStatus.DRAFT
                 && paper.getStatus() != ResearchStatus.REJECTED) {
+            // На review можно отправлять только новый draft или исправленный rejected paper.
             throw new IllegalStateException(
                     "Paper #" + paperId + " cannot be submitted from status "
                     + paper.getStatus() + ". Must be DRAFT or REJECTED.");
@@ -102,6 +106,7 @@ public class ResearchService {
         }
 
         if (authorshipRepository.findByPaperId(paperId).isEmpty()) {
+            // Без авторов статью нельзя отправлять на проверку.
             throw new IllegalStateException(
                     "Paper #" + paperId + " must have at least one author.");
         }
@@ -117,6 +122,7 @@ public class ResearchService {
         ResearchPaper paper = requirePaper(paperId);
 
         if (paper.getStatus() != ResearchStatus.UNDER_REVIEW) {
+            // Publish делаем только после review, чтобы не публиковать черновики сразу.
             throw new IllegalStateException(
                     "Paper #" + paperId + " must be UNDER_REVIEW to publish "
                     + "(current: " + paper.getStatus() + ").");
@@ -160,6 +166,7 @@ public class ResearchService {
         ResearchPaper paper = requirePaper(paperId);
 
         if (paper.getStatus() != ResearchStatus.PUBLISHED) {
+            // Цитировать можно только опубликованные papers.
             throw new IllegalStateException(
                     "Only PUBLISHED papers can be cited (paper #"
                     + paperId + " is " + paper.getStatus() + ").");
@@ -250,6 +257,7 @@ public class ResearchService {
     }
 
     private void requireEditable(ResearchPaper paper) {
+        // Когда paper уже на review или published, менять authors поздно.
         if (paper.getStatus() == ResearchStatus.UNDER_REVIEW
                 || paper.getStatus() == ResearchStatus.PUBLISHED) {
             throw new IllegalStateException(

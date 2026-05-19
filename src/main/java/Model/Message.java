@@ -1,5 +1,5 @@
 import java.time.LocalDateTime;
-public class Message {
+public class Message implements java.io.Serializable {
 
     private Long id;
     private Long senderId;      
