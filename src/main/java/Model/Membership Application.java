@@ -30,8 +30,38 @@ public class MembershipApplication{
     public void setSubmittedAt(LocalDateTime a){
         submittedAt=a;
     }
+    public Long getId(){
+    return id;
+    }
 
+    public void setId(Long a){
+    id=a;
+    }
+
+    public Student getStudent(){
+    return student;
+    }
+
+    public void setStudent(Student a){
+    student=a;
+    }
+
+    public Organization getOrganization(){
+    return organization;
+    }
+
+    public void setOrganization(Organization a){
+    organization=a;
+    }
+
+    public String getBody(){
+    return body;
+    }
+
+    public void setBody(String a){
+    body=a;
+    }
     public String toString(){
         return student+" "+applicationStatus;
     }
-}
+    }
