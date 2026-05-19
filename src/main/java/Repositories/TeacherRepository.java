@@ -25,7 +25,11 @@ public class TeacherRepository {
     public Optional<Teacher> findByEmployeeId(String employeeId) {
                 return teachers.stream().filter(t -> t.getEmployeeId().equals(employeeId)).findFirst();
     }
-
+    public Optional<Teacher> findById(Long id){
+    return teachers.stream()
+            .filter(t -> t.getId() != null && t.getId().equals(id))
+            .findFirst();
+    }
     public List<Teacher> findByDepartment(Long deptId) {
         List<Teacher> result = new ArrayList<>();
         for (Teacher t : teachers) {
