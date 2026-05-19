@@ -1,79 +1,101 @@
-
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
-public class MembershipRepository {
+public class MembershipRepository{
 
-    /**
-     * Default constructor
-     */
-    public MembershipRepository() {
-    }
-
-    /**
-     * 
-     */
     private List<Membership> memberships;
 
-    /**
-     * 
-     */
-    public void Attribute1;
-
-    /**
-     * @param membership 
-     * @return
-     */
-    public Membership save(Membership membership) {
-        // TODO implement here
-        return null;
+    public MembershipRepository(){
+        memberships=new ArrayList<>();
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public Optional<Membership> findById(Long id) {
-        // TODO implement here
-        return null;
+    public Membership save(Membership a){
+        if(a.getId()==null){
+            a.setId(generateId());
+            memberships.add(a);
+        }else{
+            Optional<Membership> old=findById(a.getId());
+
+            if(old.isPresent()){
+                memberships.remove(old.get());
+            }
+
+            memberships.add(a);
+        }
+
+        return a;
     }
 
-    /**
-     * @param studentId 
-     * @return
-     */
-    public List<Membership> findByStudent(Long studentId) {
-        // TODO implement here
-        return null;
+    public Optional<Membership> findById(Long a){
+        for(Membership m:memberships){
+            if(m.getId()!=null&&m.getId().equals(a)){
+                return Optional.of(m);
+            }
+        }
+
+        return Optional.empty();
     }
 
-    /**
-     * @param orgId 
-     * @return
-     */
-    public List<Membership> findByOrganization(Long orgId) {
-        // TODO implement here
-        return null;
+    public List<Membership> findByOrganizationId(Long a){
+        List<Membership> result=new ArrayList<>();
+
+        for(Membership m:memberships){
+            if(m.getOrganization()!=null&&m.getOrganization().getId()!=null&&m.getOrganization().getId().equals(a)){
+                result.add(m);
+            }
+        }
+
+        return result;
     }
 
-    /**
-     * @return
-     */
-    public List<Membership> findAll() {
-        // TODO implement here
-        return null;
+    public List<Membership> findByStudentId(Long a){
+        List<Membership> result=new ArrayList<>();
+
+        for(Membership m:memberships){
+            if(m.getStudent()!=null&&m.getStudent().getId()!=null&&m.getStudent().getId().equals(a)){
+                result.add(m);
+            }
+        }
+
+        return result;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+    public boolean existsByStudentIdAndOrganizationId(Long a,Long b){
+        for(Membership m:memberships){
+            if(m.getStudent()!=null&&m.getOrganization()!=null
+                    &&m.getStudent().getId()!=null
+                    &&m.getOrganization().getId()!=null
+                    &&m.getStudent().getId().equals(a)
+                    &&m.getOrganization().getId().equals(b)
+                    &&m.getStatus()==MembershipStatus.ACTIVE){
+                return true;
+            }
+        }
+
+        return false;
     }
 
+    public List<Membership> findAll(){
+        return memberships;
+    }
+
+    public void deleteById(Long a){
+        Optional<Membership> membership=findById(a);
+
+        if(membership.isPresent()){
+            memberships.remove(membership.get());
+        }
+    }
+
+    private Long generateId(){
+        Long max=0L;
+
+        for(Membership m:memberships){
+            if(m.getId()!=null&&m.getId()>max){
+                max=m.getId();
+            }
+        }
+
+        return max+1;
+    }
 }
