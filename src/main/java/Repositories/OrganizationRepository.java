@@ -1,78 +1,84 @@
-
 import java.io.*;
 import java.util.*;
 
-/**
- * 
- */
-public class OrganizationRepository {
+public class OrganizationRepository{
 
-    /**
-     * Default constructor
-     */
-    public OrganizationRepository() {
+    private List<Organization> organizations;
+
+    public OrganizationRepository(){
+        organizations=new ArrayList<>();
     }
 
-    /**
-     * 
-     */
-    private List<Organizations> organizations;
+    public Organization save(Organization a){
+        if(a.getId()==null){
+            a.setId(generateId());
+            organizations.add(a);
+        }else{
+            Optional<Organization> old=findById(a.getId());
 
-    /**
-     * 
-     */
-    public void Attribute1;
+            if(old.isPresent()){
+                organizations.remove(old.get());
+            }
 
-    /**
-     * @param org 
-     * @return
-     */
-    public Organization save(Organization org) {
-        // TODO implement here
-        return null;
+            organizations.add(a);
+        }
+
+        return a;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public Optional<Organization> findById(Long id) {
-        // TODO implement here
-        return null;
+    public Optional<Organization> findById(Long a){
+        for(Organization o:organizations){
+            if(o.getId()!=null&&o.getId().equals(a)){
+                return Optional.of(o);
+            }
+        }
+
+        return Optional.empty();
     }
 
-    /**
-     * @param name 
-     * @return
-     */
-    public Optional<Organization> findByName(String name) {
-        // TODO implement here
-        return null;
+    public Optional<Organization> findByName(String a){
+        for(Organization o:organizations){
+            if(o.getName()!=null&&o.getName().equalsIgnoreCase(a)){
+                return Optional.of(o);
+            }
+        }
+
+        return Optional.empty();
     }
 
-    /**
-     * @return
-     */
-    public List<Organization> findAllActive() {
-        // TODO implement here
-        return null;
+    public List<Organization> findAllActive(){
+        List<Organization> result=new ArrayList<>();
+
+        for(Organization o:organizations){
+            if(o.getIsActive()!=null&&o.getIsActive()){
+                result.add(o);
+            }
+        }
+
+        return result;
     }
 
-    /**
-     * @return
-     */
-    public List<Organization> findAll() {
-        // TODO implement here
-        return null;
+    public List<Organization> findAll(){
+        return organizations;
     }
 
-    /**
-     * @param id 
-     * @return
-     */
-    public void deleteById(Long id) {
-        // TODO implement here
-        return null;
+    public void deleteById(Long a){
+        Optional<Organization> org=findById(a);
+
+        if(org.isPresent()){
+            organizations.remove(org.get());
+        }
     }
 
+    private Long generateId(){
+        Long max=0L;
+
+        for(Organization o:organizations){
+            if(o.getId()!=null&&o.getId()>max){
+                max=o.getId();
+            }
+        }
+
+        return max+1;
+    }
 }
