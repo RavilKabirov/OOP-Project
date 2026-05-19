@@ -8,7 +8,7 @@ public class Course{
     private List<Teacher> teachers;
     private List<Enrollment> enrollments;
     private CourseType courseType;
-
+	private Department department;
     public Course() {
         this.teachers=new ArrayList<>();
         this.enrollments=new ArrayList<>();
@@ -38,6 +38,13 @@ public class Course{
     public int getCredits() {
         return credits;
     }
+	public Department getDepartment(){
+    return department;
+	}
+
+	public void setDepartment(Department department){
+    this.department = department;
+	}
     public void setCredits(int value) {
         this.credits = value;
     }
