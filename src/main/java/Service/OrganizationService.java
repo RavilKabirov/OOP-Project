@@ -1,179 +1,260 @@
-
 import java.io.*;
 import java.util.*;
+import java.time.*;
 
-/**
- * 
- */
-public class OrganizationService {
+public class OrganizationService{
 
-    /**
-     * Default constructor
-     */
-    public OrganizationService() {
-    }
-
-    /**
-     * 
-     */
     private OrganizationRepository organizationRepository;
-
-    /**
-     * 
-     */
     private MembershipRepository membershipRepository;
-
-    /**
-     * 
-     */
     private MembershipApplicationRepository applicationRepository;
-
-    /**
-     * 
-     */
     private StudentRepository studentRepository;
 
-    /**
-     * @param data 
-     * @param leaderId 
-     * @return
-     */
-    public Organization createOrganization(OrganizationCreationRequest data, Long leaderId) {
-        // TODO implement here
-        return null;
+    public OrganizationService(){
     }
 
-    /**
-     * @param orgId 
-     * @param data 
-     * @return
-     */
-    public Organization updateOrganization(Long orgId, OrganizationUpdateRequest data) {
-        // TODO implement here
-        return null;
+    public OrganizationService(OrganizationRepository a,MembershipRepository b,MembershipApplicationRepository c,StudentRepository d){
+        organizationRepository=a;
+        membershipRepository=b;
+        applicationRepository=c;
+        studentRepository=d;
     }
 
-    /**
-     * @param orgId 
-     * @return
-     */
-    public void deleteOrganization(Long orgId) {
-        // TODO implement here
-        return null;
+    public Organization createOrganization(OrganizationCreationRequest a,Long b){
+        Student leader=studentRepository.findById(b)
+                .orElseThrow(()->new IllegalArgumentException("Leader not found"));
+
+        if(organizationRepository.findByName(a.getName()).isPresent()){
+            throw new IllegalStateException("Organization with this name already exists");
+        }
+
+        Organization org=new Organization();
+        org.setName(a.getName());
+        org.setDescription(a.getDescription());
+        org.setLeader(leader);
+        org.setFoundedAt(LocalDateTime.now());
+        org.setIsActive(true);
+
+        Organization saved=organizationRepository.save(org);
+
+        Membership membership=new Membership();
+        membership.setStudent(leader);
+        membership.setOrganization(saved);
+        membership.setRole(MembershipRole.LEADER);
+        membership.activate();
+
+        Membership savedMembership=membershipRepository.save(membership);
+        saved.addMember(savedMembership);
+
+        return saved;
     }
 
-    /**
-     * @param orgId 
-     * @return
-     */
-    public Optional<Organization> getOrganizationById(Long orgId) {
-        // TODO implement here
-        return null;
+    public Organization updateOrganization(Long a,OrganizationUpdateRequest b){
+        Organization org=organizationRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Organization not found"));
+
+        if(b.getName()!=null){
+            org.setName(b.getName());
+        }
+
+        if(b.getDescription()!=null){
+            org.setDescription(b.getDescription());
+        }
+
+        return organizationRepository.save(org);
     }
 
-    /**
-     * @return
-     */
-    public List<Organization> getAllActiveOrganizations() {
-        // TODO implement here
-        return null;
+    public void deleteOrganization(Long a){
+        Organization org=organizationRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Organization not found"));
+
+        List<Membership> members=membershipRepository.findByOrganizationId(a);
+
+        for(Membership m:members){
+            if(m.getStatus()==MembershipStatus.ACTIVE){
+                throw new IllegalStateException("Cannot delete organization with active members");
+            }
+        }
+
+        List<MembershipApplication> apps=applicationRepository.findByOrganizationId(a);
+
+        for(MembershipApplication app:apps){
+            if(app.getApplicationStatus()==ApplicationStatus.PENDING){
+                throw new IllegalStateException("Cannot delete organization with pending applications");
+            }
+        }
+
+        org.setIsActive(false);
+        organizationRepository.save(org);
     }
 
-    /**
-     * @param keyword 
-     * @return
-     */
-    public List<Organization> searchOrganizations(String keyword) {
-        // TODO implement here
-        return null;
+    public Optional<Organization> getOrganizationById(Long a){
+        return organizationRepository.findById(a);
     }
 
-    /**
-     * @param studentId 
-     * @param orgId 
-     * @param message 
-     * @return
-     */
-    public MembershipApplication applyForMembership(Long studentId, Long orgId, String message) {
-        // TODO implement here
-        return null;
+    public List<Organization> getAllActiveOrganizations(){
+        return organizationRepository.findAllActive();
     }
 
-    /**
-     * @param appId 
-     * @param leaderId 
-     * @return
-     */
-    public Membership approveApplication(Long appId, Long leaderId) {
-        // TODO implement here
-        return null;
+    public List<Organization> searchOrganizations(String a){
+        List<Organization> result=new ArrayList<>();
+
+        for(Organization o:organizationRepository.findAllActive()){
+            if(o.getName()!=null&&o.getName().toLowerCase().contains(a.toLowerCase())){
+                result.add(o);
+            }
+        }
+
+        return result;
     }
 
-    /**
-     * @param appId 
-     * @param leaderId 
-     * @return
-     */
-    public void rejectApplication(Long appId, Long leaderId) {
-        // TODO implement here
-        return null;
+    public MembershipApplication applyForMembership(Long a,Long b,String c){
+        Student student=studentRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Student not found"));
+
+        Organization org=organizationRepository.findById(b)
+                .orElseThrow(()->new IllegalArgumentException("Organization not found"));
+
+        if(org.getIsActive()==null||!org.getIsActive()){
+            throw new IllegalStateException("Organization is not active");
+        }
+
+        if(membershipRepository.existsByStudentIdAndOrganizationId(a,b)){
+            throw new IllegalStateException("Student is already member");
+        }
+
+        MembershipApplication app=new MembershipApplication();
+        app.setStudent(student);
+        app.setOrganization(org);
+        app.setBody(c);
+        app.setApplicationStatus(ApplicationStatus.PENDING);
+        app.setSubmittedAt(LocalDateTime.now());
+
+        return applicationRepository.save(app);
     }
 
-    /**
-     * @param studentId 
-     * @param orgId 
-     * @param role 
-     * @return
-     */
-    public Membership addMember(Long studentId, Long orgId, MembershipRole role) {
-        // TODO implement here
-        return null;
+    public Membership approveApplication(Long a,Long b){
+        MembershipApplication app=applicationRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Application not found"));
+
+        Organization org=app.getOrganization();
+
+        if(!org.getLeader().getId().equals(b)){
+            throw new IllegalStateException("Only leader can approve application");
+        }
+
+        if(app.getApplicationStatus()!=ApplicationStatus.PENDING){
+            throw new IllegalStateException("Application is not pending");
+        }
+
+        app.approve();
+        applicationRepository.save(app);
+
+        Membership membership=new Membership();
+        membership.setStudent(app.getStudent());
+        membership.setOrganization(org);
+        membership.setRole(MembershipRole.MEMBER);
+        membership.activate();
+
+        Membership saved=membershipRepository.save(membership);
+        org.addMember(saved);
+
+        return saved;
     }
 
-    /**
-     * @param membershipId 
-     * @return
-     */
-    public void removeMember(Long membershipId) {
-        // TODO implement here
-        return null;
+    public void rejectApplication(Long a,Long b){
+        MembershipApplication app=applicationRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Application not found"));
+
+        Organization org=app.getOrganization();
+
+        if(!org.getLeader().getId().equals(b)){
+            throw new IllegalStateException("Only leader can reject application");
+        }
+
+        if(app.getApplicationStatus()!=ApplicationStatus.PENDING){
+            throw new IllegalStateException("Application is not pending");
+        }
+
+        app.reject();
+        applicationRepository.save(app);
     }
 
-    /**
-     * @param membershipId 
-     * @param newRole 
-     * @return
-     */
-    public void changeMemberRole(Long membershipId, MembershipRole newRole) {
-        // TODO implement here
-        return null;
+    public Membership addMember(Long a,Long b,MembershipRole c){
+        Student student=studentRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Student not found"));
+
+        Organization org=organizationRepository.findById(b)
+                .orElseThrow(()->new IllegalArgumentException("Organization not found"));
+
+        if(org.getIsActive()==null||!org.getIsActive()){
+            throw new IllegalStateException("Organization is not active");
+        }
+
+        if(membershipRepository.existsByStudentIdAndOrganizationId(a,b)){
+            throw new IllegalStateException("Student is already member");
+        }
+
+        Membership membership=new Membership();
+        membership.setStudent(student);
+        membership.setOrganization(org);
+        membership.setRole(c);
+        membership.activate();
+
+        Membership saved=membershipRepository.save(membership);
+        org.addMember(saved);
+
+        return saved;
     }
 
-    /**
-     * @param orgId 
-     * @return
-     */
-    public List<Membership> getOrganizationMembers(Long orgId) {
-        // TODO implement here
-        return null;
+    public void removeMember(Long a){
+        Membership membership=membershipRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Membership not found"));
+
+        membership.deactivate();
+        membershipRepository.save(membership);
     }
 
-    /**
-     * @param studentId 
-     * @return
-     */
-    public List<Organization> getStudentOrganizations(Long studentId) {
-        // TODO implement here
-        return null;
+    public void changeMemberRole(Long a,MembershipRole b){
+        Membership membership=membershipRepository.findById(a)
+                .orElseThrow(()->new IllegalArgumentException("Membership not found"));
+
+        membership.setRole(b);
+        membershipRepository.save(membership);
     }
 
-    /**
-     * @param orgId 
-     * @return
-     */
-    public List<MembershipApplication> getPendingApplications(Long orgId) {
-        // TODO implement here
-        return null;
+    public List<Membership> getOrganizationMembers(Long a){
+        List<Membership> result=new ArrayList<>();
+
+        for(Membership m:membershipRepository.findByOrganizationId(a)){
+            if(m.getStatus()==MembershipStatus.ACTIVE){
+                result.add(m);
+            }
+        }
+
+        return result;
     }
 
+    public List<Organization> getStudentOrganizations(Long a){
+        List<Organization> result=new ArrayList<>();
+
+        for(Membership m:membershipRepository.findByStudentId(a)){
+            if(m.getStatus()==MembershipStatus.ACTIVE&&m.getOrganization()!=null&&m.getOrganization().getIsActive()!=null&&m.getOrganization().getIsActive()){
+                result.add(m.getOrganization());
+            }
+        }
+
+        return result;
+    }
+
+    public List<MembershipApplication> getPendingApplications(Long a){
+        List<MembershipApplication> result=new ArrayList<>();
+
+        for(MembershipApplication app:applicationRepository.findByOrganizationId(a)){
+            if(app.getApplicationStatus()==ApplicationStatus.PENDING){
+                result.add(app);
+            }
+        }
+
+        return result;
+    }
 }
