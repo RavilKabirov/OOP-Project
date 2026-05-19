@@ -41,7 +41,9 @@ public class WorkloadService {
         course.addTeacher(teacher);
         teacher.addCourse(course);
 
-        courseRepository.save(course);
+        System.out.println("Assigned " + teacher.getFullName() + 
+        	    " to " + course.getName() + " for " + hours + " hours");
+        	courseRepository.save(course);courseRepository.save(course);
     }
 
     public void removeTeacherFromCourse(Long teacherId, Long courseId) {
@@ -88,7 +90,8 @@ public class WorkloadService {
         );
 
         for (Teacher teacher : teachers) {
-            TeacherWorkload workload = new TeacherWorkload(teacher, Semester.FALL);
+        	TeacherWorkload workload = new TeacherWorkload(teacher, 
+        		    new Semester(2024, Semester.SemesterTerm.FALL));
             for (Course course : teacher.getCourses()) {
                 workload.addCourse(course, 3);
             }
@@ -106,7 +109,8 @@ public class WorkloadService {
         );
 
         for (Teacher teacher : allTeachers) {
-            TeacherWorkload workload = new TeacherWorkload(teacher, Semester.FALL);
+        	TeacherWorkload workload = new TeacherWorkload(teacher, 
+        		    new Semester(2024, Semester.SemesterTerm.FALL));
             for (Course course : teacher.getCourses()) {
                 workload.addCourse(course, 3);
             }
