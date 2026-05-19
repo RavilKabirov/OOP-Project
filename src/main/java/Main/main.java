@@ -48,6 +48,9 @@ public class main {
 
         System.out.println("\n========== Research Service Tests ============\n");
         runResearchTests();
+        
+        System.out.println("\n========== Workload Service Tests ============\n");
+        runWorkloadTests();
         System.out.println("\n========== All Tests Complete ==========\n");
         
 
@@ -1726,6 +1729,118 @@ public class main {
         } catch (IllegalStateException ex) {
             System.out.println("  Correctly rejected: " + ex.getMessage());
         }
+    }
+    
+    private static void runWorkloadTests() {
+
+        CourseRepository     courseRepo  = new CourseRepository();
+        TeacherRepository    teacherRepo = new TeacherRepository();
+        DepartmentRepository deptRepo    = new DepartmentRepository();
+        WorkloadService      workloadService =
+                new WorkloadService(courseRepo, teacherRepo, deptRepo);
+
+        Department cs = new Department();
+        cs.setName("Computer Science");
+        cs.setCode("CS");
+        deptRepo.save(cs);
+
+        Teacher alice = new Teacher("alice@uni.edu", "Alice", "Johnson");
+        alice.setEmployeeId("T001");
+        alice.setDepartment(cs);
+        teacherRepo.save(alice);
+
+        Teacher bob = new Teacher("bob@uni.edu", "Bob", "Smith");
+        bob.setEmployeeId("T002");
+        bob.setDepartment(cs);
+        teacherRepo.save(bob);
+
+        Course math = new Course();
+        math.setCourseId("MATH101");
+        math.setName("Calculus I");
+        math.setCredits(4);
+        courseRepo.save(math);
+
+        Course oop = new Course();
+        oop.setCourseId("CS101");
+        oop.setName("OOP");
+        oop.setCredits(5);
+        courseRepo.save(oop);
+
+        // --- TEST 1: assignTeacherToCourse ---
+        System.out.println("--- TEST 1: assignTeacherToCourse ---");
+        workloadService.assignTeacherToCourse(1L, 1L, 3);
+        workloadService.assignTeacherToCourse(2L, 2L, 4);
+        System.out.println("  Alice courses: " + alice.getCourses().size() + " (expect 1)");
+        System.out.println("  Bob courses: " + bob.getCourses().size() + " (expect 1)");
+
+        // --- TEST 2: duplicate assign guard ---
+        System.out.println("\n--- TEST 2: duplicate assign guard ---");
+        try {
+            workloadService.assignTeacherToCourse(1L, 1L, 3);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // --- TEST 3: invalid hours guard ---
+        System.out.println("\n--- TEST 3: invalid hours guard ---");
+        try {
+            workloadService.assignTeacherToCourse(1L, 2L, -1);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // --- TEST 4: getTeacherWorkload ---
+        System.out.println("\n--- TEST 4: getTeacherWorkload ---");
+        TeacherWorkload aliceWorkload = workloadService.getTeacherWorkload(
+            1L, new Semester(2024, Semester.SemesterTerm.FALL)
+        );
+        System.out.println("  " + aliceWorkload);
+        System.out.println("  Alice total hours: " + aliceWorkload.getTotalHours() + " (expect 60)");
+
+        // --- TEST 5: getDepartmentWorkload ---
+        System.out.println("\n--- TEST 5: getDepartmentWorkload ---");
+        WorkloadReport deptReport = workloadService.getDepartmentWorkload(cs.getId());
+        System.out.println("  " + deptReport);
+        System.out.println("  Teachers in report: " + deptReport.getWorkloads().size() + " (expect 2)");
+
+        // --- TEST 6: getFacultyWorkload ---
+        System.out.println("\n--- TEST 6: getFacultyWorkload ---");
+        WorkloadReport facultyReport = workloadService.getFacultyWorkload(1L);
+        System.out.println("  " + facultyReport);
+
+        // --- TEST 7: approveWorkload ---
+        System.out.println("\n--- TEST 7: approveWorkload ---");
+        workloadService.approveWorkload(1L, 1L);
+
+        // --- TEST 8: removeTeacherFromCourse ---
+        System.out.println("\n--- TEST 8: removeTeacherFromCourse ---");
+        workloadService.removeTeacherFromCourse(1L, 1L);
+        System.out.println("  Alice courses after remove: "
+                + alice.getCourses().size() + " (expect 0)");
+
+        // --- TEST 9: remove not assigned guard ---
+        System.out.println("\n--- TEST 9: remove not assigned guard ---");
+        try {
+            workloadService.removeTeacherFromCourse(1L, 1L);
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalStateException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        // --- TEST 10: unknown teacher guard ---
+        System.out.println("\n--- TEST 10: unknown teacher guard ---");
+        try {
+            workloadService.getTeacherWorkload(
+                999L, new Semester(2024, Semester.SemesterTerm.SPRING)
+            );
+            System.out.println("  ERROR: should have thrown!");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("  Correctly rejected: " + ex.getMessage());
+        }
+
+        System.out.println("\n=== All WorkloadService tests completed ===");
     }
     private static int readInt(Scanner scanner) {
         while (!scanner.hasNextInt()) {
