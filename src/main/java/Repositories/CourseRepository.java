@@ -22,7 +22,17 @@ public class CourseRepository {
                 .filter(c -> c.getCourseId().equals(courseId))
                 .findFirst();
     }
+    public List<Course> findByDepartment(Long deptId){
+    List<Course> result = new ArrayList<>();
 
+    for(Course c : courses){
+        if(c.getDepartment() != null && c.getDepartment().getId().equals(deptId)){
+            result.add(c);
+        }
+    }
+
+    return result;
+    }
     public List<Course> findByTeacher(String teacherId) {
         List<Course> result = new ArrayList<>();
         for (Course c : courses) {
