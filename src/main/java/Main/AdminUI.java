@@ -101,6 +101,7 @@ public class AdminUI {
         ConsoleUtils.printHeader("Create User");
         try {
             String email = ConsoleUtils.readNonBlank(sc, "  Email: ");
+            EmailValidator.validate(email);
             if (ctx.getUserRepository().existsByEmail(email)) {
                 throw new IllegalArgumentException("Email already exists.");
             }

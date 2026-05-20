@@ -41,6 +41,7 @@ public class TeacherService {
         }
 
         if (profileData.getEmail() != null) {
+            EmailValidator.validate(profileData.getEmail());
             teacher.setEmail(profileData.getEmail());
         }
 

@@ -63,6 +63,7 @@ public class UserService {
     }
 
     public User createUser(UserCreationRequest userData) {
+        EmailValidator.validate(userData.getEmail());
         if (userRepository.existsByEmail(userData.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
@@ -84,6 +85,11 @@ public class UserService {
         }
 
         if (userData.getEmail() != null) {
+            EmailValidator.validate(userData.getEmail());
+            Optional<User> existing = userRepository.findByEmail(userData.getEmail());
+            if (existing.isPresent() && !existing.get().getId().equals(userId)) {
+                throw new RuntimeException("Email already exists");
+            }
             user.setEmail(userData.getEmail());
         }
 

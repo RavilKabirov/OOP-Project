@@ -12,6 +12,7 @@ public class AuthService {
     }
 
     public User login(String email, String password) {
+        EmailValidator.validate(email);
         User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Incorrect email or password"));
         if (!user.isActive()) throw new IllegalStateException("Account blocked");
         if (!passwordEncoder.matches(password, user.getPasswordHash()))
@@ -21,6 +22,7 @@ public class AuthService {
 
 
     public User register(String email, String password, String firstName, String lastName, UserRole role) {
+        EmailValidator.validate(email);
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email is already used");
         }

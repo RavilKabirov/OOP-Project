@@ -79,6 +79,7 @@ public class MainMenuUI {
         String password = ConsoleUtils.readPassword(sc,  "  Password: ");
 
         try {
+            EmailValidator.validate(email);
             User user = ctx.getUserRepository().findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException(
                             "No account found for " + email));
