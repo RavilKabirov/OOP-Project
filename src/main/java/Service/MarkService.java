@@ -2,32 +2,23 @@ import java.util.*;
 
 public class MarkService {
 
-    private final MarkRepository       markRepository;
+    private final MarkRepository  markRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final TeacherRepository    teacherRepository;
+    private final TeacherRepository teacherRepository;
 
-    public MarkService(MarkRepository markRepository,
-                       EnrollmentRepository enrollmentRepository,
-                       TeacherRepository teacherRepository) {
-        this.markRepository       = markRepository;
+    public MarkService(MarkRepository markRepository, EnrollmentRepository enrollmentRepository,   TeacherRepository teacherRepository) {
+        this.markRepository = markRepository;
         this.enrollmentRepository = enrollmentRepository;
-        this.teacherRepository    = teacherRepository;
+        this.teacherRepository = teacherRepository;
     }
 
-    public Mark assignMark(Long teacherId, String studentId, String courseId,
-                           double value, MarkType type, String comment) {
+    public Mark assignMark(Long teacherId, String studentId, String courseId, double value, MarkType type, String comment) {
         validateScore(value, type);
-        Teacher teacher = teacherRepository.findAll().stream()
-                .filter(t -> t.getId() != null && t.getId().equals(teacherId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Teacher not found with id: " + teacherId));
+        Teacher teacher = teacherRepository.findAll().stream().filter(t -> t.getId() != null && t.getId().equals(teacherId)).findFirst().orElseThrow(() -> new IllegalArgumentException(        "Teacher not found with id: " + teacherId));
 
-        boolean teachesCourse = teacher.getCourses().stream()
-                .anyMatch(c -> c.getCourseId().equals(courseId));
+        boolean teachesCourse = teacher.getCourses().stream().anyMatch(c -> c.getCourseId().equals(courseId));
         if (!teachesCourse) {
-            throw new IllegalStateException(
-                    "Teacher " + teacherId + " does not teach course " + courseId);
+            throw new IllegalStateException("Teacher " + teacherId + " does not teach course " + courseId);
         }
 
         Enrollment enrollment = findActiveEnrollment(studentId, courseId);
@@ -41,9 +32,7 @@ public class MarkService {
         markRepository.save(mark);
         enrollment.setMark(mark);
         enrollmentRepository.save(enrollment);
-        System.out.printf("[MarkService] Assigned %s=%.2f for student %s in course %s%s%n",
-                type, value, studentId, courseId,
-                (comment != null && !comment.isEmpty() ? " [" + comment + "]" : ""));
+        System.out.printf("[MarkService] Assigned %s=%.2f for student %s in course %s%s%n", type, value, studentId, courseId, (comment != null && !comment.isEmpty() ? " [" + comment + "]" : ""));
         return mark;
     }
 
@@ -54,9 +43,7 @@ public class MarkService {
         applyScore(mark, request.getType(), request.getNewValue());
         markRepository.save(mark);
 
-        System.out.printf("[MarkService] Updated mark for enrollment #%d: %s=%.2f%s%n",
-                enrollmentId, request.getType(), request.getNewValue(),
-                (request.getComment() != null ? " [" + request.getComment() + "]" : ""));
+        System.out.printf("[MarkService] Updated mark for enrollment #%d: %s=%.2f%s%n", enrollmentId, request.getType(), request.getNewValue(), (request.getComment() != null ? " [" + request.getComment() + "]" : ""));
         return mark;
     }
 
@@ -89,8 +76,7 @@ public class MarkService {
         List<Mark> result = new ArrayList<>();
         for (Mark m : markRepository.findAll()) {
             Enrollment e = enrollmentRepository.findById(m.getEnrollmentId()).orElse(null);
-            if (e != null && e.getCourse() != null
-                    && e.getCourse().getCourseId().equals(courseId)) {
+            if (e != null && e.getCourse() != null && e.getCourse().getCourseId().equals(courseId)) {
                 result.add(m);
             }
         }
@@ -123,45 +109,27 @@ public class MarkService {
         }
 
         int n = marks.size();
-        return new MarkStatistics(
-                courseId, n,
-                sumTotal  / n,
-                highest,
-                lowest,
-                sumFirst  / n,
-                sumSecond / n,
-                sumFinal  / n,
-                pass, fail);
+        return new MarkStatistics( courseId, n, sumTotal  / n, highest, lowest, sumFirst  / n, sumSecond / n, sumFinal  / n, pass, fail);
     }
 
     private Enrollment findActiveEnrollment(String studentId, String courseId) {
-        return enrollmentRepository.findByStudent(studentId).stream()
-                .filter(e -> e.getCourse() != null
-                          && e.getCourse().getCourseId().equals(courseId)
-                          && e.getStatus() == EnrollmentStatus.ACTIVE)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "No active enrollment found for student " + studentId
-                        + " in course " + courseId));
+        return enrollmentRepository.findByStudent(studentId).stream().filter(e -> e.getCourse() != null  && e.getCourse().getCourseId().equals(courseId)  && e.getStatus() == EnrollmentStatus.ACTIVE).findFirst().orElseThrow(() -> new IllegalStateException("No active enrollment found for student " + studentId+ " in course " + courseId));
     }
 
     private Mark requireMark(Long enrollmentId) {
         Mark mark = markRepository.findByEnrollment(enrollmentId);
         if (mark == null) {
-            throw new IllegalArgumentException(
-                    "No mark found for enrollment #" + enrollmentId);
+            throw new IllegalArgumentException("No mark found for enrollment #" + enrollmentId);
         }
         return mark;
     }
 
     private void validateScore(double value, MarkType type) {
         if ((type == MarkType.FIRST_ATTESTATION || type == MarkType.SECOND_ATTESTATION) && (value < 0.0 || value > 30.0)) {
-            throw new IllegalArgumentException(
-                    "Score must be between 0 and 30 for attestations, got: " + value);
+            throw new IllegalArgumentException("Score must be between 0 and 30 for attestations, got: " + value);
         }
         if ((type == MarkType.FINAL_EXAM) && (value < 0.0 || value > 40.0)){
-            throw new IllegalArgumentException(
-                    "Score must be between 0 and 40 for final exam, got: " + value);
+            throw new IllegalArgumentException("Score must be between 0 and 40 for final exam, got: " + value);
         }
     }
 

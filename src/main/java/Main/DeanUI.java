@@ -16,11 +16,15 @@ public class DeanUI {
     private final ApplicationContext ctx;
     private final Scanner sc;
     private final MessageCenterUI messageCenterUI;
+    private final NewsFeedUI newsFeedUI;
+    private final SupportRequestUI supportRequestUI;
 
     public DeanUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
         this.sc = sc;
         this.messageCenterUI = new MessageCenterUI(ctx, sc);
+        this.newsFeedUI = new NewsFeedUI(ctx, sc);
+        this.supportRequestUI = new SupportRequestUI(ctx, sc);
     }
 
     public void run() {
@@ -34,15 +38,19 @@ public class DeanUI {
             System.out.println("  2. Complaints");
             System.out.println("  3. Reports");
             System.out.println("  4. Messages");
-            System.out.println("  5. Profile");
+            System.out.println("  5. News and research");
+            System.out.println("  6. Tech support requests");
+            System.out.println("  7. Profile");
             System.out.println("  0. Log out");
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 5);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 7);
             switch (choice) {
                 case 1: showFacultyOverview(dean); break;
                 case 2: showComplaints();          break;
                 case 3: showReports(dean);         break;
                 case 4: messageCenterUI.runForEmployee(dean); break;
-                case 5: showProfile(dean);         break;
+                case 5: newsFeedUI.run();           break;
+                case 6: supportRequestUI.runForEmployee(dean); break;
+                case 7: showProfile(dean);         break;
                 case 0: running = false;           break;
             }
         }

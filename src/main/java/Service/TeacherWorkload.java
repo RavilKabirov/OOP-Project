@@ -24,9 +24,6 @@ public class TeacherWorkload {
 	
 	@Override
 	public String toString() {
-		return "TeacherWorkload{teacher=" + teacher.getFullName() + 
-				", semester=" + semester + 
-				", courses=" + courses + 
-				", totalHours=" + totalHours + "}";
+		return "TeacherWorkload{teacher=" + teacher.getFullName() + ", semester=" + semester + ", courses=" + courses + ", totalHours=" + totalHours + "}";
 	}
 }

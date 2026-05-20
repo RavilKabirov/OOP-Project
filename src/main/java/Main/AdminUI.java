@@ -18,6 +18,8 @@ public class AdminUI {
     private final OrganizationUI organizationUI;
     private final WorkloadUI workloadUI;
     private final ComplaintManagementUI complaintUI;
+    private final NewsFeedUI newsFeedUI;
+    private final SupportRequestUI supportRequestUI;
 
     public AdminUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
@@ -27,6 +29,8 @@ public class AdminUI {
         this.organizationUI = new OrganizationUI(ctx, sc);
         this.workloadUI = new WorkloadUI(ctx, sc);
         this.complaintUI = new ComplaintManagementUI(ctx, sc);
+        this.newsFeedUI = new NewsFeedUI(ctx, sc);
+        this.supportRequestUI = new SupportRequestUI(ctx, sc);
     }
 
     public void run() {
@@ -43,10 +47,12 @@ public class AdminUI {
             System.out.println("  8. Workload management");
             System.out.println("  9. Research review");
             System.out.println("  10. Reports");
-            System.out.println("  11. Profile");
+            System.out.println("  11. News and research");
+            System.out.println("  12. Tech support requests");
+            System.out.println("  13. Profile");
             System.out.println("  0. Log out");
 
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 11);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 13);
             switch (choice) {
                 case 1: showUserManagement();    break;
                 case 2: showFacultyManagement(); break;
@@ -58,7 +64,9 @@ public class AdminUI {
                 case 8: workloadUI.runManagement(); break;
                 case 9: showResearchReview();     break;
                 case 10: showReports();           break;
-                case 11: showProfile();           break;
+                case 11: newsFeedUI.run();         break;
+                case 12: supportRequestUI.runForEmployee((Employee) AuthContext.getCurrentUser()); break;
+                case 13: showProfile();           break;
                 case 0: running = false;         break;
             }
         }
@@ -121,7 +129,8 @@ public class AdminUI {
         System.out.println("  6. PhD Student");
         System.out.println("  7. HR Manager");
         System.out.println("  8. PR Manager");
-        int type = ConsoleUtils.readIntInRange(sc, "  Choose: ", 1, 8);
+        System.out.println("  9. Tech Support Specialist");
+        int type = ConsoleUtils.readIntInRange(sc, "  Choose: ", 1, 9);
 
         switch (type) {
             case 2: {
@@ -166,6 +175,12 @@ public class AdminUI {
                 manager.setCampaignFocus(ConsoleUtils.readLine(sc, "  Campaign focus (optional): "));
                 manager.setLevel(readManagerLevel());
                 return manager;
+            }
+            case 9: {
+                TechSupportSpecialist specialist = new TechSupportSpecialist(email, firstName, lastName);
+                specialist.setEmployeeId(ConsoleUtils.readNonBlank(sc, "  Employee ID: "));
+                specialist.setSupportArea(ConsoleUtils.readLine(sc, "  Support area (optional): "));
+                return specialist;
             }
             default:
                 return new User(email, firstName, lastName);
@@ -393,14 +408,16 @@ public class AdminUI {
             System.out.println("  2. Teachers by department");
             System.out.println("  3. Assign teacher to department");
             System.out.println("  4. Update teacher profile");
+            System.out.println("  5. Assign PhD supervisor");
             System.out.println("  0. Back");
 
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 4);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 5);
             switch (choice) {
                 case 1: searchTeachers(); break;
                 case 2: teachersByDepartment(); break;
                 case 3: assignTeacherToDepartment(); break;
                 case 4: updateTeacherProfile(); break;
+                case 5: assignPhDSupervisor(); break;
                 case 0: running = false; break;
             }
         }
@@ -462,6 +479,21 @@ public class AdminUI {
                             email.isBlank() ? null : email,
                             position));
             ConsoleUtils.printSuccess("Teacher profile updated.");
+        } catch (Exception ex) {
+            ConsoleUtils.printError(ex.getMessage());
+        }
+        ConsoleUtils.pressEnterToContinue(sc);
+    }
+
+    private void assignPhDSupervisor() {
+        ConsoleUtils.printHeader("Assign PhD Supervisor");
+        try {
+            String phdStudentId = ConsoleUtils.readNonBlank(sc, "  PhD Student ID: ");
+            Long teacherId = Long.parseLong(ConsoleUtils.readNonBlank(sc, "  Supervisor teacher user ID: "));
+            ctx.getPhdSupervisorService().assignSupervisor(phdStudentId, teacherId);
+            ConsoleUtils.printSuccess("Supervisor assigned.");
+        } catch (SupervisorHIndexException ex) {
+            ConsoleUtils.printError("Supervisor h-index check failed: " + ex.getMessage());
         } catch (Exception ex) {
             ConsoleUtils.printError(ex.getMessage());
         }

@@ -12,6 +12,8 @@ public class HRManagerUI {
     private final DepartmentManagementUI departmentUI;
     private final WorkloadUI workloadUI;
     private final MessageCenterUI messageCenterUI;
+    private final NewsFeedUI newsFeedUI;
+    private final SupportRequestUI supportRequestUI;
 
     public HRManagerUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
@@ -19,6 +21,8 @@ public class HRManagerUI {
         this.departmentUI = new DepartmentManagementUI(ctx, sc);
         this.workloadUI = new WorkloadUI(ctx, sc);
         this.messageCenterUI = new MessageCenterUI(ctx, sc);
+        this.newsFeedUI = new NewsFeedUI(ctx, sc);
+        this.supportRequestUI = new SupportRequestUI(ctx, sc);
     }
 
     public void run() {
@@ -33,10 +37,12 @@ public class HRManagerUI {
             System.out.println("  5. Department management");
             System.out.println("  6. Workload management");
             System.out.println("  7. Messages");
-            System.out.println("  8. Profile");
+            System.out.println("  8. News and research");
+            System.out.println("  9. Tech support requests");
+            System.out.println("  10. Profile");
             System.out.println("  0. Log out");
 
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 8);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 10);
             switch (choice) {
                 case 1: showHRReport(); break;
                 case 2: searchTeachers(); break;
@@ -45,7 +51,9 @@ public class HRManagerUI {
                 case 5: departmentUI.run(); break;
                 case 6: workloadUI.runManagement(); break;
                 case 7: messageCenterUI.runForEmployee(manager); break;
-                case 8: showProfile(manager); break;
+                case 8: newsFeedUI.run(); break;
+                case 9: supportRequestUI.runForEmployee(manager); break;
+                case 10: showProfile(manager); break;
                 case 0: running = false; break;
             }
         }

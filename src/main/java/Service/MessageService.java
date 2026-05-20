@@ -26,9 +26,7 @@ public class MessageService {
         Employee recipient = requireEmployee(recipientId, "Recipient");
         Message message = new Message(senderId, recipientId, subject, body);
         messageRepository.save(message);
-        System.out.printf("[MessageService] Message #%d: %s → %s | \"%s\"%n",
-                message.getId(), sender.getFullName(),
-                recipient.getFullName(), subject);
+        System.out.printf("[MessageService] Message #%d: %s → %s | \"%s\"%n", message.getId(), sender.getFullName(), recipient.getFullName(), subject);
         return message;
     }
     public List<Message> getInbox(Long employeeId) {
@@ -49,8 +47,7 @@ public class MessageService {
         Message message = requireMessage(messageId);
         if (!message.getRecipientId().equals(employeeId)) {
             // Read может ставить только получатель, sender не должен читать за другого.
-            throw new IllegalArgumentException(
-                    "Employee " + employeeId + " is not the recipient of message #" + messageId);
+            throw new IllegalArgumentException("Employee " + employeeId + " is not the recipient of message #" + messageId);
         }
         message.setRead(true);
         messageRepository.save(message);
@@ -60,20 +57,18 @@ public class MessageService {
         requireEmployee(employeeId, "Employee");
         Message message = requireMessage(messageId);
 
-        boolean isSender    = message.getSenderId().equals(employeeId);
+        boolean isSender = message.getSenderId().equals(employeeId);
         boolean isRecipient = message.getRecipientId().equals(employeeId);
 
         if (!isSender && !isRecipient) {
             // Удалять message может только тот, кто участвовал в переписке.
-            throw new IllegalArgumentException(
-                    "Employee " + employeeId + " has no access to message #" + messageId);
+            throw new IllegalArgumentException("Employee " + employeeId + " has no access to message #" + messageId);
         }
-        if (isSender)    message.setDeletedBySender(true);
+        if (isSender) message.setDeletedBySender(true);
         if (isRecipient) message.setDeletedByRecipient(true);
 
         messageRepository.save(message);
-        System.out.println("[MessageService] Message #" + messageId
-                + " deleted for employee " + employeeId + ".");
+        System.out.println("[MessageService] Message #" + messageId + " deleted for employee " + employeeId + ".");
     }
 
     public List<Message> getConversation(Long employeeId1, Long employeeId2) {
@@ -83,21 +78,14 @@ public class MessageService {
     }
 
     private Employee requireEmployee(Long userId, String role) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        role + " not found with id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException( role + " not found with id: " + userId));
         if (!(user instanceof Employee)) {
-            throw new IllegalArgumentException(
-                    role + " with id " + userId + " is not an Employee "
-                    + "(type: " + user.getClass().getSimpleName() + "). "
-                    + "Only employees can send and receive messages.");
+            throw new IllegalArgumentException( role + " with id " + userId + " is not an Employee " + "(type: " + user.getClass().getSimpleName() + "). " + "Only employees can send and receive messages.");
         }
         return (Employee) user;
     }
 
     private Message requireMessage(Long messageId) {
-        return messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Message not found with id: " + messageId));
+        return messageRepository.findById(messageId).orElseThrow(() -> new IllegalArgumentException("Message not found with id: " + messageId));
     }
 }

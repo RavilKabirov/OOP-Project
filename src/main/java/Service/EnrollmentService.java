@@ -6,26 +6,21 @@ public class EnrollmentService {
     private StudentRepository studentRepository;
     private CourseRepository courseRepository;
 
-    public EnrollmentService(EnrollmentRepository enrollmentRepository,
-                              StudentRepository studentRepository,
-                              CourseRepository courseRepository) {
+    public EnrollmentService(EnrollmentRepository enrollmentRepository, StudentRepository studentRepository, CourseRepository courseRepository) {
         this.enrollmentRepository = enrollmentRepository;
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
     }
 
     public Enrollment enrollStudent(String studentId, String courseId) {
-        Student student = studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
+        Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
 
-        Course course = courseRepository.findByCourseId(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
+        Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
 
-        Optional<Enrollment> existing = enrollmentRepository.findByStudentAndCourse(studentId, course);
-        if (existing.isPresent()) {
-            EnrollmentStatus s = existing.get().getStatus();
-            // Если запись уже ACTIVE или PENDING, второй раз на тот же курс записывать нельзя.
-            if (s == EnrollmentStatus.ACTIVE || s == EnrollmentStatus.PENDING) {
+        for (Enrollment existing : enrollmentRepository.findByStudent(studentId)) {
+            EnrollmentStatus s = existing.getStatus();
+            if (existing.getCourse() != null && existing.getCourse().getCourseId().equals(courseId) && (s == EnrollmentStatus.ACTIVE || s == EnrollmentStatus.PENDING)) {
+                // Если уже есть активная запись, второй раз на тот же курс нельзя.
                 throw new IllegalStateException("Student " + studentId + " is already enrolled in " + courseId);
             }
         }
@@ -36,24 +31,18 @@ public class EnrollmentService {
         enrollment.setStatus(EnrollmentStatus.ACTIVE);
 
         enrollment = enrollmentRepository.save(enrollment);
-
         course.addEnrollment(enrollment);
 
-        System.out.println("[EnrollmentService] Enrolled " + student.getFullName()
-                + " in " + course.getName());
+        System.out.println("[EnrollmentService] Enrolled " + student.getFullName()  + " in " + course.getName());
         return enrollment;
     }
 
     public void dropCourse(String studentId, String courseId) {
-        Course course = courseRepository.findByCourseId(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
+        Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
 
-        Enrollment enrollment = enrollmentRepository.findByStudentAndCourse(studentId, course)
-                .orElseThrow(() -> new IllegalStateException(
-                        "No active enrollment found for student " + studentId + " in course " + courseId));
+        Enrollment enrollment = enrollmentRepository.findByStudentAndCourse(studentId, course).orElseThrow(() -> new IllegalStateException("No active enrollment found for student " + studentId + " in course " + courseId));
 
         if (enrollment.getStatus() == EnrollmentStatus.REJECTED) {
-            // REJECTED тут используется как dropped, поэтому повторно drop делать смысла нет.
             throw new IllegalStateException("Enrollment is already dropped.");
         }
 
@@ -65,14 +54,12 @@ public class EnrollmentService {
     }
 
     public List<Enrollment> getStudentEnrollments(String studentId) {
-        studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
+        studentRepository.findByStudentId(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
         return enrollmentRepository.findByStudent(studentId);
     }
 
     public List<Enrollment> getCourseRoster(String courseId) {
-        Course course = courseRepository.findByCourseId(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
+        Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
         return course.getEnrollments();
     }
 
@@ -81,11 +68,9 @@ public class EnrollmentService {
             throw new IllegalArgumentException("Grade must be between 0 and 100.");
         }
 
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found: " + enrollmentId));
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(() -> new IllegalArgumentException("Enrollment not found: " + enrollmentId));
 
         if (enrollment.getStatus() != EnrollmentStatus.ACTIVE) {
-            // Завершать можно только активную запись, чтобы не менять уже закрытые/отклоненные enrollments.
             throw new IllegalStateException("Can only complete an ACTIVE enrollment.");
         }
 
@@ -95,22 +80,60 @@ public class EnrollmentService {
         enrollment.setMark(mark);
 
         enrollmentRepository.save(enrollment);
-        
-        System.out.println("[EnrollmentService] Completed enrollment #" + enrollmentId
-                + " with grade " + mark.calculateTotal());
+
+        System.out.println("[EnrollmentService] Completed enrollment #" + enrollmentId + " with grade " + mark.calculateTotal());
     }
 
     public EnrollmentStatus getEnrollmentStatus(String studentId, String courseId) {
         Course course = courseRepository.findByCourseId(courseId).orElse(null);
         if (course == null) return null;
 
-        return enrollmentRepository.findByStudentAndCourse(studentId, course)
-                .map(Enrollment::getStatus)
-                .orElse(null);
+        return enrollmentRepository.findByStudentAndCourse(studentId, course).map(Enrollment::getStatus).orElse(null);
     }
 
     public boolean isStudentEnrolled(String studentId, String courseId) {
         EnrollmentStatus status = getEnrollmentStatus(studentId, courseId);
         return status == EnrollmentStatus.ACTIVE;
+    }
+
+    public boolean isEligibleForRetake(String studentId, String courseId) {
+        return isEligibleForRetake(findLatestEnrollmentWithMark(studentId, courseId));
+    }
+
+    public Enrollment requestRetake(String studentId, String courseId) {
+        Enrollment enrollment = findLatestEnrollmentWithMark(studentId, courseId);
+        if (!isEligibleForRetake(enrollment)) {
+            // На retake можно только если 2 attestations меньше 30 вместе или final меньше 20.
+            throw new IllegalStateException("Student is not eligible for retake.");
+        }
+        enrollment.setStatus(EnrollmentStatus.RETAKE);
+        enrollmentRepository.save(enrollment);
+        if (enrollment.getCourse() != null) {
+            enrollment.getCourse().removeEnrollment(enrollment);
+        }
+        return enrollment;
+    }
+
+    private boolean isEligibleForRetake(Enrollment enrollment) {
+        Mark mark = enrollment.getMark();
+        if (mark == null) {
+            return false;
+        }
+        double attestations = mark.getFirstAttestation() + mark.getSecondAttestation();
+        return attestations < 30.0 || mark.getFinal() < 20.0;
+    }
+
+    private Enrollment findLatestEnrollmentWithMark(String studentId, String courseId) {
+        studentRepository.findByStudentId(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
+        courseRepository.findByCourseId(courseId).orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
+
+        List<Enrollment> enrollments = enrollmentRepository.findByStudent(studentId);
+        for (int i = enrollments.size() - 1; i >= 0; i--) {
+            Enrollment e = enrollments.get(i);
+            if (e.getCourse() != null && e.getCourse().getCourseId().equals(courseId) && e.getMark() != null) {
+                return e;
+            }
+        }
+        throw new IllegalStateException("No graded enrollment found for student " + studentId + " in course " + courseId);
     }
 }

@@ -13,10 +13,7 @@ public class NewsService {
     }
     
     public News publishNews(Long authorId, String title, String content) {
-        userRepository.findById(authorId)
-        		.orElseThrow(() -> new RuntimeException(
-        				"Author not found with id: " + authorId
-        				));
+        userRepository.findById(authorId).orElseThrow(() -> new RuntimeException("Author not found with id: " + authorId));
         if (title == null || title.isEmpty()) {
         	throw new RuntimeException("Title can not be empty");
         }
@@ -28,14 +25,8 @@ public class NewsService {
     }
 
     public News editNews(Long newsId, Long editorId, String newContent) {
-        userRepository.findById(editorId)
-        		.orElseThrow(() -> new RuntimeException(
-        				"Editor not found with id: " + editorId
-        				));
-        News news = newsRepository.findById(newsId)
-        		.orElseThrow(() -> new RuntimeException(
-        				"News not found with id: " + newsId
-        				));
+        userRepository.findById(editorId).orElseThrow(() -> new RuntimeException("Editor not found with id: " + editorId));
+        News news = newsRepository.findById(newsId).orElseThrow(() -> new RuntimeException("News not found with id: " + newsId));
         if (news.isArchived()) {
         	throw new RuntimeException("Can not edit archived news");
         }
@@ -47,14 +38,8 @@ public class NewsService {
     }
 
     public void archiveNews(Long newsId, Long archivedBy) {
-        userRepository.findById(archivedBy)
-        		.orElseThrow(() -> new RuntimeException(
-        				"User not found with id: " + archivedBy
-        				));
-        News news = newsRepository.findById(newsId)
-        		.orElseThrow(() -> new RuntimeException(
-        				"News not found with id: " + newsId
-        				));
+        userRepository.findById(archivedBy).orElseThrow(() -> new RuntimeException("User not found with id: " + archivedBy));
+        News news = newsRepository.findById(newsId).orElseThrow(() -> new RuntimeException("News not found with id: " + newsId));
         if (news.isArchived()) {
         	throw new RuntimeException("News is already archived");
         }
@@ -64,10 +49,7 @@ public class NewsService {
     }
 
     public void deleteNews(Long newsId) {
-        newsRepository.findById(newsId)
-        	.orElseThrow(() -> new RuntimeException(
-        			"News not found with id: " + newsId
-        			));
+        newsRepository.findById(newsId).orElseThrow(() -> new RuntimeException("News not found with id: " + newsId));
         
         newsRepository.deleteById(newsId);
     }
@@ -99,10 +81,8 @@ public class NewsService {
         	boolean matches = true;
         	if (keyword != null && !keyword.isEmpty()) {
         		String lower = keyword.toLowerCase();
-        		boolean inTitle = news.getTitle() != null && 
-        				news.getTitle().toLowerCase().contains(lower);
-        		boolean inContent = news.getContent() != null &&
-        				news.getContent().toLowerCase().contains(lower);
+        		boolean inTitle = news.getTitle() != null && news.getTitle().toLowerCase().contains(lower);
+        		boolean inContent = news.getContent() != null && news.getContent().toLowerCase().contains(lower);
         		if (!inTitle && !inContent) {
         			matches = false;
         		}
@@ -130,10 +110,7 @@ public class NewsService {
     }
 
     public List<News> getNewsByAuthor(Long authorId) {
-        userRepository.findById(authorId)
-        		.orElseThrow(() -> new RuntimeException(
-        				"Author not found with id: " + authorId
-        				));
+        userRepository.findById(authorId).orElseThrow(() -> new RuntimeException("Author not found with id: " + authorId));
         return newsRepository.findByAuthorId(authorId);
     }
 

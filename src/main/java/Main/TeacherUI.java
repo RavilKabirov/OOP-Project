@@ -19,6 +19,9 @@ public class TeacherUI {
     private final ResearcherUI researcherUI;
     private final WorkloadUI workloadUI;
     private final MessageCenterUI messageCenterUI;
+    private final TeacherLessonUI teacherLessonUI;
+    private final NewsFeedUI newsFeedUI;
+    private final SupportRequestUI supportRequestUI;
 
     public TeacherUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
@@ -26,6 +29,9 @@ public class TeacherUI {
         this.researcherUI = new ResearcherUI(ctx, sc);
         this.workloadUI = new WorkloadUI(ctx, sc);
         this.messageCenterUI = new MessageCenterUI(ctx, sc);
+        this.teacherLessonUI = new TeacherLessonUI(ctx, sc);
+        this.newsFeedUI = new NewsFeedUI(ctx, sc);
+        this.supportRequestUI = new SupportRequestUI(ctx, sc);
     }
 
     public void run() {
@@ -39,19 +45,25 @@ public class TeacherUI {
             System.out.println("  3. Complaints");
             System.out.println("  4. Messages");
             System.out.println("  5. Research");
-            System.out.println("  6. Workload");
-            System.out.println("  7. Profile");
+            System.out.println("  6. Lessons");
+            System.out.println("  7. Workload");
+            System.out.println("  8. News and research");
+            System.out.println("  9. Tech support requests");
+            System.out.println("  10. Profile");
             System.out.println("  0. Log out");
 
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 7);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 10);
             switch (choice) {
                 case 1: showMyCourses(teacher); break;
                 case 2: showAssignGrade(teacher);break;
                 case 3: showComplaints(teacher); break;
                 case 4: messageCenterUI.runForEmployee(teacher); break;
                 case 5: researcherUI.run(); break;
-                case 6: workloadUI.showCurrentTeacherWorkload(teacher); break;
-                case 7: showProfileMenu(teacher); break;
+                case 6: teacherLessonUI.run(teacher); break;
+                case 7: workloadUI.showCurrentTeacherWorkload(teacher); break;
+                case 8: newsFeedUI.run(); break;
+                case 9: supportRequestUI.runForEmployee(teacher); break;
+                case 10: showProfileMenu(teacher); break;
                 case 0: running = false; break;
             }
         }

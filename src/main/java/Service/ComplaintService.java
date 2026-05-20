@@ -7,17 +7,13 @@ public class ComplaintService {
     private final TeacherRepository   teacherRepository;
     private final StudentRepository   studentRepository;
 
-    public ComplaintService(ComplaintRepository complaintRepository,
-                            TeacherRepository teacherRepository,
-                            StudentRepository studentRepository) {
+    public ComplaintService(ComplaintRepository complaintRepository, TeacherRepository teacherRepository, StudentRepository studentRepository) {
         this.complaintRepository = complaintRepository;
-        this.teacherRepository   = teacherRepository;
-        this.studentRepository   = studentRepository;
+        this.teacherRepository = teacherRepository;
+        this.studentRepository = studentRepository;
     }
 
-    public Complaint submitComplaint(Long teacherId, String studentId,
-                                     ManagerForComplaint recipient,
-                                     UrgencyLevel urgency) {
+    public Complaint submitComplaint(Long teacherId, String studentId, ManagerForComplaint recipient, UrgencyLevel urgency) {
         Teacher teacher = requireTeacher(teacherId);
         Student student = requireStudent(studentId);
 
@@ -32,9 +28,7 @@ public class ComplaintService {
 
         complaintRepository.save(complaint);
 
-        System.out.printf("[ComplaintService] Complaint #%d submitted by %s about %s → %s [%s]%n",
-                complaint.getId(), teacher.getFullName(),
-                student.getFullName(), recipient, urgency);
+        System.out.printf("[ComplaintService] Complaint #%d submitted by %s about %s → %s [%s]%n", complaint.getId(), teacher.getFullName(), student.getFullName(), recipient, urgency);
         return complaint;
     }
 
@@ -43,9 +37,7 @@ public class ComplaintService {
 
         if (complaint.getComplaintStatus() != ComplaintStatus.SUBMITTED) {
             // На review можно брать только новую complaint, иначе статусы будут прыгать назад.
-            throw new IllegalStateException(
-                    "Complaint #" + complaintId + " is not SUBMITTED (current: "
-                    + complaint.getComplaintStatus() + ").");
+            throw new IllegalStateException( "Complaint #" + complaintId + " is not SUBMITTED (current: " + complaint.getComplaintStatus() + ").");
         }
 
         complaint.updateStatus(ComplaintStatus.UNDER_REVIEW);
@@ -60,9 +52,7 @@ public class ComplaintService {
 
         if (complaint.getComplaintStatus() != ComplaintStatus.UNDER_REVIEW) {
             // Resolve делаем только после review, чтобы complaint прошла нормальный workflow.
-            throw new IllegalStateException(
-                    "Complaint #" + complaintId + " must be UNDER_REVIEW to resolve "
-                    + "(current: " + complaint.getComplaintStatus() + ").");
+            throw new IllegalStateException( "Complaint #" + complaintId + " must be UNDER_REVIEW to resolve " + "(current: " + complaint.getComplaintStatus() + ").");
         }
 
         complaint.updateStatus(ComplaintStatus.RESOLVED);
@@ -78,8 +68,7 @@ public class ComplaintService {
         ComplaintStatus current = complaint.getComplaintStatus();
         if (current == ComplaintStatus.RESOLVED || current == ComplaintStatus.REJECTED) {
             // Закрытые complaints уже не меняем.
-            throw new IllegalStateException(
-                    "Complaint #" + complaintId + " is already " + current + ".");
+            throw new IllegalStateException("Complaint #" + complaintId + " is already " + current + ".");
         }
 
         complaint.updateStatus(ComplaintStatus.REJECTED);
@@ -95,9 +84,7 @@ public class ComplaintService {
         ComplaintStatus status = complaint.getComplaintStatus();
         if (status != ComplaintStatus.RESOLVED && status != ComplaintStatus.REJECTED) {
             // Удалять можно только закрытые complaints, активные надо сначала resolve/reject.
-            throw new IllegalStateException(
-                    "Cannot delete complaint #" + complaintId
-                    + " while it is still " + status + ".");
+            throw new IllegalStateException( "Cannot delete complaint #" + complaintId + " while it is still " + status + ".");
         }
 
         complaintRepository.deleteById(complaintId);
@@ -136,22 +123,14 @@ public class ComplaintService {
 
 
     private Complaint requireComplaint(Long id) {
-        return complaintRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Complaint not found with id: " + id));
+        return complaintRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Complaint not found with id: " + id));
     }
 
     private Teacher requireTeacher(Long teacherId) {
-        return teacherRepository.findAll().stream()
-                .filter(t -> t.getId() != null && t.getId().equals(teacherId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Teacher not found with id: " + teacherId));
+        return teacherRepository.findAll().stream().filter(t -> t.getId() != null && t.getId().equals(teacherId)).findFirst().orElseThrow(() -> new IllegalArgumentException("Teacher not found with id: " + teacherId));
     }
 
     private Student requireStudent(String studentId) {
-        return studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Student not found with studentId: " + studentId));
+        return studentRepository.findByStudentId(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found with studentId: " + studentId));
     }
 }

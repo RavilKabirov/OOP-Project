@@ -3,10 +3,10 @@ import java.util.Scanner;
 /**
  *
  * Секции:
- *   1. My courses — EnrollmentService
- *   2. My grades  — MarkService
- *   3. My transcript  — TranscriptService
- *   4. Research — ResearchService (для MasterStudent / PhDStudent)
+ *   1. My courses - EnrollmentService
+ *   2. My grades  - MarkService
+ *   3. My transcript - TranscriptService
+ *   4. Research - ResearchService (для MasterStudent / PhDStudent)
  *   5. Profile
  *   0. Log out
  */
@@ -15,50 +15,50 @@ public class StudentUI {
     private final Scanner sc;
     private final ResearcherUI researcherUI;
     private final OrganizationUI organizationUI;
+    private final NewsFeedUI newsFeedUI;
+
     public StudentUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
         this.sc  = sc;
         this.researcherUI = new ResearcherUI(ctx, sc);
         this.organizationUI = new OrganizationUI(ctx, sc);
+        this.newsFeedUI = new NewsFeedUI(ctx, sc);
     }
 
     public void run() {
         boolean running = true;
         while (running) {
             Student student = AuthContext.asStudent();
-            ConsoleUtils.printHeader("Student Portal — " + student.getFullName());
+            ConsoleUtils.printHeader("Student Portal - " + student.getFullName());
 
             System.out.println("  1. My courses");
             System.out.println("  2. My grades");
             System.out.println("  3. My transcript");
             System.out.println("  4. Course registration");
             System.out.println("  5. Organizations");
+            System.out.println("  6. News and research");
             if (AuthContext.isResearcher()) {
-                System.out.println("  6. Research");
+                System.out.println("  7. Research");
             }
-            System.out.println("  " + (AuthContext.isResearcher() ? "7" : "6") + ". Profile");
+            System.out.println("  " + (AuthContext.isResearcher() ? "8" : "7") + ". Profile");
             System.out.println("  0. Log out");
 
-            int max = AuthContext.isResearcher() ? 7 : 6;
+            int max = AuthContext.isResearcher() ? 8 : 7;
             int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, max);
 
             switch (choice) {
-                case 1: showMyCourses(student);    break;
-                case 2: showMyGrades(student);     break;
+                case 1: showMyCourses(student); break;
+                case 2: showMyGrades(student); break;
                 case 3: showMyTranscript(student); break;
-                case 4:
-                    showCourseRegistration(student);
-                    break;
-                case 5:
-                    organizationUI.runForStudent(student);
-                    break;
-                case 6:
-                    // У обычного bachelor тут сразу Profile, а у Master/PhD сначала Research.
+                case 4: showCourseRegistration(student); break;
+                case 5: organizationUI.runForStudent(student); break;
+                case 6: newsFeedUI.run(); break;
+                case 7:
                     if (AuthContext.isResearcher()) researcherUI.run();
                     else showProfile(student);
                     break;
-                case 7: showProfile(student);      break;
-                case 0: running = false;           break;
+                case 8: showProfile(student); break;
+                case 0: running = false; break;
             }
         }
     }
@@ -70,10 +70,13 @@ public class StudentUI {
             System.out.println("  You are not enrolled in any courses.");
         } else {
             for (Enrollment e : enrollments) {
-                System.out.printf("  [%-10s] %s  (%d credits)%n", e.getStatus(), e.getCourse() != null ? e.getCourse().getName() : "—", e.getCourse() != null ? e.getCourse().getCredits() : 0); 
+                System.out.printf("  [%-10s] %s  (%d credits)%n",
+                        e.getStatus(),
+                        e.getCourse() != null ? e.getCourse().getName() : "-",
+                        e.getCourse() != null ? e.getCourse().getCredits() : 0);
+            }
         }
         ConsoleUtils.pressEnterToContinue(sc);
-    }
     }
 
     private void showMyGrades(Student student) {
@@ -83,7 +86,7 @@ public class StudentUI {
             System.out.println("  No enrollment records found.");
         } else {
             for (Enrollment e : enrollments) {
-                String courseName = e.getCourse() != null ? e.getCourse().getName() : "—";
+                String courseName = e.getCourse() != null ? e.getCourse().getName() : "-";
                 if (e.getMark() != null) {
                     System.out.printf("  %-30s  %s%n", courseName, e.getMark());
                 } else {
@@ -93,7 +96,6 @@ public class StudentUI {
         }
         ConsoleUtils.pressEnterToContinue(sc);
     }
-
 
     private void showMyTranscript(Student student) {
         ConsoleUtils.printHeader("My Transcript");
@@ -112,14 +114,18 @@ public class StudentUI {
             System.out.println("  2. Enroll in course");
             System.out.println("  3. Drop course");
             System.out.println("  4. Check enrollment status");
+            System.out.println("  5. Check retake eligibility");
+            System.out.println("  6. Go to retake");
             System.out.println("  0. Back");
 
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 4);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, 6);
             switch (choice) {
                 case 1: showAvailableCourses(student); break;
                 case 2: enrollInCourse(student); break;
                 case 3: dropCourse(student); break;
                 case 4: showEnrollmentStatus(student); break;
+                case 5: checkRetakeEligibility(student); break;
+                case 6: requestRetake(student); break;
                 case 0: running = false; break;
             }
         }
@@ -166,6 +172,33 @@ public class StudentUI {
         String courseId = ConsoleUtils.readNonBlank(sc, "  Course ID: ");
         System.out.println("  Status: " + ctx.getEnrollmentService()
                 .getEnrollmentStatus(student.getStudentId(), courseId));
+        ConsoleUtils.pressEnterToContinue(sc);
+    }
+
+    private void checkRetakeEligibility(Student student) {
+        ConsoleUtils.printHeader("Retake Eligibility");
+        try {
+            String courseId = ConsoleUtils.readNonBlank(sc, "  Course ID: ");
+            boolean eligible = ctx.getEnrollmentService()
+                    .isEligibleForRetake(student.getStudentId(), courseId);
+            System.out.println("  Retake: " + (eligible ? "available" : "not available"));
+            System.out.println("  Rule: attestations sum < 30 or final exam < 20.");
+        } catch (Exception ex) {
+            ConsoleUtils.printError(ex.getMessage());
+        }
+        ConsoleUtils.pressEnterToContinue(sc);
+    }
+
+    private void requestRetake(Student student) {
+        ConsoleUtils.printHeader("Go To Retake");
+        try {
+            String courseId = ConsoleUtils.readNonBlank(sc, "  Course ID: ");
+            Enrollment enrollment = ctx.getEnrollmentService()
+                    .requestRetake(student.getStudentId(), courseId);
+            ConsoleUtils.printSuccess("Enrollment #" + enrollment.getId() + " moved to RETAKE.");
+        } catch (Exception ex) {
+            ConsoleUtils.printError(ex.getMessage());
+        }
         ConsoleUtils.pressEnterToContinue(sc);
     }
 

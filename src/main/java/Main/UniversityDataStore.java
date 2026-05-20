@@ -72,6 +72,8 @@ public class UniversityDataStore {
         final MembershipApplicationRepository membershipApplicationRepository;
         final ResearchPaperRepository researchPaperRepository;
         final AuthorshipRepository authorshipRepository;
+        final LessonRepository lessonRepository;
+        final TechSupportRequestRepository techSupportRequestRepository;
 
         State(ApplicationContext ctx) {
             userRepository = ctx.getUserRepository();
@@ -91,6 +93,8 @@ public class UniversityDataStore {
             membershipApplicationRepository = ctx.getMembershipApplicationRepository();
             researchPaperRepository = ctx.getResearchPaperRepository();
             authorshipRepository = ctx.getAuthorshipRepository();
+            lessonRepository = ctx.getLessonRepository();
+            techSupportRequestRepository = ctx.getTechSupportRequestRepository();
         }
     }
 }

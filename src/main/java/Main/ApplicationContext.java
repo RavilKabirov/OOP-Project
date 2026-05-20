@@ -28,6 +28,8 @@ public class ApplicationContext {
     private final MembershipApplicationRepository membershipApplicationRepository;
     private final ResearchPaperRepository researchPaperRepository;
     private final AuthorshipRepository authorshipRepository;
+    private final LessonRepository lessonRepository;
+    private final TechSupportRequestRepository techSupportRequestRepository;
 
     // Сервисы
     private final UserService userService;
@@ -45,6 +47,9 @@ public class ApplicationContext {
     private final WorkloadService workloadService;
     private final ReportService reportService;
     private final ResearchService researchService;
+    private final LessonService lessonService;
+    private final PhDSupervisorService phdSupervisorService;
+    private final TechSupportService techSupportService;
 
     // Конструктор
 
@@ -73,6 +78,8 @@ public class ApplicationContext {
             membershipApplicationRepository = data.membershipApplicationRepository;
             researchPaperRepository = data.researchPaperRepository;
             authorshipRepository = data.authorshipRepository;
+            lessonRepository = data.lessonRepository != null ? data.lessonRepository : new LessonRepository();
+            techSupportRequestRepository = data.techSupportRequestRepository != null ? data.techSupportRequestRepository : new TechSupportRequestRepository();
         } else {
             userRepository = new UserRepository();
             studentRepository = new StudentRepository();
@@ -91,6 +98,8 @@ public class ApplicationContext {
             membershipApplicationRepository = new MembershipApplicationRepository();
             researchPaperRepository = new ResearchPaperRepository();
             authorshipRepository = new AuthorshipRepository();
+            lessonRepository = new LessonRepository();
+            techSupportRequestRepository = new TechSupportRequestRepository();
         }
 
         // У сервисов зависимость с нужными репозиториями
@@ -124,10 +133,17 @@ public class ApplicationContext {
 
         researchService = new ResearchService(researchPaperRepository, authorshipRepository, userRepository);
 
+        lessonService = new LessonService(lessonRepository, courseRepository, teacherRepository, studentRepository);
+
+        phdSupervisorService = new PhDSupervisorService(studentRepository, teacherRepository);
+
+        techSupportService = new TechSupportService(techSupportRequestRepository, userRepository);
+
         if (!loadedFromDisk) {
             // Первый запуск приложения, поэтому заполняем чуть-чуть данных для теста.
             seedDemoData();
         }
+        ensureDemoTechSupportSpecialist();
     }
 
     // Гетеры репо
@@ -149,6 +165,8 @@ public class ApplicationContext {
     public MembershipApplicationRepository getMembershipApplicationRepository() { return membershipApplicationRepository; }
     public ResearchPaperRepository getResearchPaperRepository(){ return researchPaperRepository; }
     public AuthorshipRepository getAuthorshipRepository() { return authorshipRepository; }
+    public LessonRepository getLessonRepository() { return lessonRepository; }
+    public TechSupportRequestRepository getTechSupportRequestRepository() { return techSupportRequestRepository; }
 
     // Гетеры сервисов
 
@@ -167,6 +185,9 @@ public class ApplicationContext {
     public WorkloadService getWorkloadService() { return workloadService; }
     public ReportService getReportService(){ return reportService; }
     public ResearchService getResearchService(){ return researchService; }
+    public LessonService getLessonService() { return lessonService; }
+    public PhDSupervisorService getPhdSupervisorService() { return phdSupervisorService; }
+    public TechSupportService getTechSupportService() { return techSupportService; }
 
     public void saveData() {
         // Вызывается при закрытии приложения из MainFinal.
@@ -310,5 +331,18 @@ public class ApplicationContext {
         messageService.sendMessage(pr.getId(), dean.getId(), "News published", "Welcome Week news is now live.");
 
         System.out.println("[ApplicationContext] Demo database created. Admin: admin@admin.com/admin, demo password: password");
+    }
+
+    private void ensureDemoTechSupportSpecialist() {
+        // Для старых сохраненок добавляем саппорта, иначе тестить роль будет нечем.
+        if (userRepository.findByEmail("support@uni.edu").isPresent()) {
+            return;
+        }
+        PasswordEncoder encoder = new PasswordEncoder();
+        TechSupportSpecialist specialist = new TechSupportSpecialist("support@uni.edu", "Sam", "Support");
+        specialist.setEmployeeId("SUP001");
+        specialist.setSupportArea("Accounts and internal systems");
+        specialist.setPasswordHash(encoder.encode("password"));
+        userRepository.save(specialist);
     }
 }

@@ -21,6 +21,9 @@ public class MainMenuUI {
     private final ResearcherUI researcherUI;
     private final HRManagerUI hrManagerUI;
     private final PRManagerUI prManagerUI;
+    private final TechSupportUI techSupportUI;
+    private final NewsFeedUI newsFeedUI;
+    private final SupportRequestUI supportRequestUI;
     private final PasswordEncoder pe;
 
     public MainMenuUI(ApplicationContext ctx, Scanner sc) {
@@ -34,6 +37,9 @@ public class MainMenuUI {
         this.researcherUI = new ResearcherUI(ctx, sc);
         this.hrManagerUI = new HRManagerUI(ctx, sc);
         this.prManagerUI = new PRManagerUI(ctx, sc);
+        this.techSupportUI = new TechSupportUI(ctx, sc);
+        this.newsFeedUI = new NewsFeedUI(ctx, sc);
+        this.supportRequestUI = new SupportRequestUI(ctx, sc);
     }
 
 
@@ -98,6 +104,8 @@ public class MainMenuUI {
             hrManagerUI.run();
         } else if (AuthContext.isPRManager()) {
             prManagerUI.run();
+        } else if (AuthContext.isTechSupportSpecialist()) {
+            techSupportUI.run();
         } else if (AuthContext.isTeacher()) {
             teacherUI.run();
         } else if (AuthContext.isStudent()) {
@@ -124,15 +132,28 @@ public class MainMenuUI {
             ConsoleUtils.printHeader("Account - " + user.getFullName() + "  [" + user.getClass().getSimpleName() + "]");
             System.out.println("  1. View profile");
             System.out.println("  2. Change password");
+            System.out.println("  3. News and research");
+            int supportOption = 4;
+            int researchOption = AuthContext.getCurrentUser() instanceof Employee ? 5 : 4;
+            int max = AuthContext.isResearcher() ? researchOption : (AuthContext.getCurrentUser() instanceof Employee ? supportOption : 3);
+            if (AuthContext.getCurrentUser() instanceof Employee) {
+                System.out.println("  4. Tech support requests");
+            }
             if (AuthContext.isResearcher()) {
-                System.out.println("  3. Researcher portal");
+                System.out.println("  " + researchOption + ". Researcher portal");
             }
             System.out.println("  0. Log out");
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, AuthContext.isResearcher() ? 3 : 2);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, max);
             switch (choice) {
                 case 1: showProfile(user);          break;
                 case 2: handleChangePassword(user); break;
-                case 3:
+                case 3: newsFeedUI.run(); break;
+                case 4:
+                    if (user instanceof Employee) supportRequestUI.runForEmployee((Employee) user);
+                    else if (AuthContext.isResearcher()) researcherUI.run();
+                    else ConsoleUtils.printError("Invalid option.");
+                    break;
+                case 5:
                     if (AuthContext.isResearcher()) researcherUI.run();
                     else ConsoleUtils.printError("Invalid option.");
                     break;

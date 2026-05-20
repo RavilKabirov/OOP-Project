@@ -7,4 +7,5 @@ public enum EnrollmentStatus {
     ACTIVE,
     REJECTED, 
     COMPLETED,
+    RETAKE
 }

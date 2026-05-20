@@ -61,6 +61,10 @@ public class AuthContext {
         return currentUser instanceof PRManager;
     }
 
+    public static boolean isTechSupportSpecialist() {
+        return currentUser instanceof TechSupportSpecialist;
+    }
+
     public static boolean isResearcher() {
         return currentUser instanceof IResearcher;
     }
@@ -101,5 +105,11 @@ public class AuthContext {
         if (!(currentUser instanceof PRManager))
             throw new IllegalStateException("Current user is not a PR Manager.");
         return (PRManager) currentUser;
+    }
+
+    public static TechSupportSpecialist asTechSupportSpecialist() {
+        if (!(currentUser instanceof TechSupportSpecialist))
+            throw new IllegalStateException("Current user is not a Tech Support Specialist.");
+        return (TechSupportSpecialist) currentUser;
     }
 }
