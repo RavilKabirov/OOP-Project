@@ -17,6 +17,11 @@ public class AuthService {
         if (!user.isActive()) throw new IllegalStateException("Account blocked");
         if (!passwordEncoder.matches(password, user.getPasswordHash()))
             throw new IllegalArgumentException("Incorrect email or password");
+
+        if (passwordEncoder.needsUpgrade(user.getPasswordHash())) {
+            user.setPasswordHash(passwordEncoder.encode(password));
+            userRepository.save(user);
+        }
         return user;
     }
 

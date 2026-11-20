@@ -21,15 +21,15 @@ public class MainMenuUI {
     private final ResearcherUI researcherUI;
     private final HRManagerUI hrManagerUI;
     private final PRManagerUI prManagerUI;
-    private final TechSupportUI techSupportUI;
-    private final NewsFeedUI newsFeedUI;
-    private final SupportRequestUI supportRequestUI;
+    private final RoleMenuResolver roleMenuResolver;
     private final PasswordEncoder pe;
+    private final AuthService authService;
 
     public MainMenuUI(ApplicationContext ctx, Scanner sc) {
         this.ctx = ctx;
         this.sc = sc;
         this.pe = new PasswordEncoder();
+        this.authService = new AuthService(ctx.getUserRepository(), pe);
         this.studentUI = new StudentUI(ctx, sc);
         this.teacherUI = new TeacherUI(ctx, sc);
         this.deanUI = new DeanUI(ctx, sc);
@@ -37,9 +37,9 @@ public class MainMenuUI {
         this.researcherUI = new ResearcherUI(ctx, sc);
         this.hrManagerUI = new HRManagerUI(ctx, sc);
         this.prManagerUI = new PRManagerUI(ctx, sc);
-        this.techSupportUI = new TechSupportUI(ctx, sc);
-        this.newsFeedUI = new NewsFeedUI(ctx, sc);
-        this.supportRequestUI = new SupportRequestUI(ctx, sc);
+        this.roleMenuResolver = new RoleMenuResolver(
+                deanUI, hrManagerUI, prManagerUI, teacherUI, studentUI, adminUI,
+                this::showGenericMenu);
     }
 
 
@@ -79,16 +79,10 @@ public class MainMenuUI {
         String password = ConsoleUtils.readPassword(sc,  "  Password: ");
 
         try {
-            EmailValidator.validate(email);
-            User user = ctx.getUserRepository().findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "No account found for " + email));
-
-            if (user.getPasswordHash() == null || !user.getPasswordHash().equals(pe.encode(password))) {
-                throw new IllegalArgumentException("Incorrect password.");
-            }
-            if (!user.isActive()) {
-                throw new IllegalStateException("This account has been deactivated. Contact an administrator.");
+            User user = authService.login(email, password);
+            if (user == null) {
+                ConsoleUtils.printError("Login failed.");
+                return;
             }
             AuthContext.setCurrentUser(user);
             ConsoleUtils.printSuccess("Welcome, " + user.getFullName() + "!");
@@ -99,25 +93,7 @@ public class MainMenuUI {
 
 
     private void showRoleMenu() {
-        if (AuthContext.isDean()) {
-            deanUI.run();
-        } else if (AuthContext.isHRManager()) {
-            hrManagerUI.run();
-        } else if (AuthContext.isPRManager()) {
-            prManagerUI.run();
-        } else if (AuthContext.isTechSupportSpecialist()) {
-            techSupportUI.run();
-        } else if (AuthContext.isTeacher()) {
-            teacherUI.run();
-        } else if (AuthContext.isStudent()) {
-            studentUI.run();
-        } else if (AuthContext.isAdmin()) {
-            adminUI.run();
-        } else {
-            // Generic для менеджера, которого еще нету у нас
-            showGenericMenu();
-        }
-
+        roleMenuResolver.resolve(AuthContext.getCurrentUser()).run();
         // Логаут когда UI возвращает значение
         if (AuthContext.isLoggedIn()) {
             AuthContext.logout();
@@ -133,28 +109,15 @@ public class MainMenuUI {
             ConsoleUtils.printHeader("Account - " + user.getFullName() + "  [" + user.getClass().getSimpleName() + "]");
             System.out.println("  1. View profile");
             System.out.println("  2. Change password");
-            System.out.println("  3. News and research");
-            int supportOption = 4;
-            int researchOption = AuthContext.getCurrentUser() instanceof Employee ? 5 : 4;
-            int max = AuthContext.isResearcher() ? researchOption : (AuthContext.getCurrentUser() instanceof Employee ? supportOption : 3);
-            if (AuthContext.getCurrentUser() instanceof Employee) {
-                System.out.println("  4. Tech support requests");
-            }
             if (AuthContext.isResearcher()) {
-                System.out.println("  " + researchOption + ". Researcher portal");
+                System.out.println("  3. Researcher portal");
             }
             System.out.println("  0. Log out");
-            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, max);
+            int choice = ConsoleUtils.readIntInRange(sc, "\n  Choose: ", 0, AuthContext.isResearcher() ? 3 : 2);
             switch (choice) {
                 case 1: showProfile(user);          break;
                 case 2: handleChangePassword(user); break;
-                case 3: newsFeedUI.run(); break;
-                case 4:
-                    if (user instanceof Employee) supportRequestUI.runForEmployee((Employee) user);
-                    else if (AuthContext.isResearcher()) researcherUI.run();
-                    else ConsoleUtils.printError("Invalid option.");
-                    break;
-                case 5:
+                case 3:
                     if (AuthContext.isResearcher()) researcherUI.run();
                     else ConsoleUtils.printError("Invalid option.");
                     break;

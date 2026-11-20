@@ -4,8 +4,8 @@ import java.util.List;
 public class TranscriptService {
 
     private final EnrollmentRepository enrollmentRepository;
-    private final MarkRepository       markRepository;
-    private final StudentRepository    studentRepository;
+    private final MarkRepository markRepository;
+    private final StudentRepository studentRepository;
 
     public TranscriptService(EnrollmentRepository enrollmentRepository, MarkRepository markRepository, StudentRepository studentRepository) {
         this.enrollmentRepository = enrollmentRepository;
